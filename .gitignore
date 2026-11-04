@@ -12,8 +12,13 @@ __pycache__/
 data/raw/
 materials/
 
-# Uygulamanın kaydettiği taslak ve onaylar
+# Uygulamanın kaydettiği taslak, onay, son yükleme ve model kayıtları (teslim paketine zip ile girer)
 store/
+backend/data/
+backend/logs/
+
+# Yarışma verisinden üretilen test dosyaları
+data/test/*.xlsx
 
 # Excel ve işletim sistemi kalıntıları
 ~$*.xlsx

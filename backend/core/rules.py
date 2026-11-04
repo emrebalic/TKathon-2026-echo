@@ -16,6 +16,8 @@ OZNEL_ASAMALAR = {"VIDEO", "GRUP", "IK_TEKNIK"}
 KAYIT_GEREKEN_ASAMALAR = OZNEL_ASAMALAR | {"INGILIZCE"}
 GECERLI_GEREKCELER = {"GEREKLILIK_KARSILANMADI", "KONTENJAN_KISITI"}
 KISILIK_YARGISI = re.compile(r"kişiliği|içine kapanık|uyum sağlayamaz", re.IGNORECASE)
+# Gözlemin beklentinin karşılandığını söylediği kalıplar; gerekçe "karşılanmadı" diyorsa çelişki vardır.
+OLUMLU_GOZLEM = re.compile(r"beklentisi bu görevde karşılandı|beklentisini karşılayan açıklama sundu", re.IGNORECASE)
 
 TASLAK_UYGUN = "Taslağa uygun"
 IK_INCELEME = "İK incelemesi"
@@ -42,6 +44,9 @@ BULGU_ADLARI = {
     "TEYIT_YOK": "Paylaşım teyidi yok",
     "PAYLASIM_ONAYSIZ": "Paylaşım onaylanmamış",
     "COKLU_GOZLEM": "Aynı görevde birden fazla gözlem",
+    "GOZLEM_YOK": "Değerlendirici gözlemi yok",
+    "KONTENJAN_KAYDI_YOK": "Kontenjanın idari kaydı yok",
+    "GOZLEM_GEREKCE_CELISKI": "Gözlem gerekçeyle çelişiyor",
 }
 
 
@@ -168,13 +173,23 @@ class KuralMotoru:
                     bulgular.append(Bulgu("PAYLASIM_ONAYSIZ", "İK gerekçenin adayla paylaşımını onaylamamış.", [n["kaynak_id"]]))
                 elif teyit != "EVET":
                     bulgular.append(Bulgu("TEYIT_YOK", f"Paylaşım teyidi: {teyit or 'boş'}.", [n["kaynak_id"]]))
-                for d in kimlikler(n.get("dayanak_kaynak_idleri")):
+                ik_dayanak = kimlikler(n.get("dayanak_kaynak_idleri"))
+                for d in ik_dayanak:
                     self._dayanak_kontrol(d, b, asama, bulgular, karardan=False)
                     dayanaklar.append(d)
                 if not _bos(n.get("kurum_ici_not")):
                     uyarilar.append("Kurum içi not var: içeriği ve iç kodlar e-postaya aktarılmamalı.")
+                tum_dayanak = [self.kayit(d) for d in dict.fromkeys(karar_dayanak + ik_dayanak)]
+                tum_dayanak = [r for t, r in (x for x in tum_dayanak if x) if t == "asama_kayitlari"]
                 if gerekce == "KONTENJAN_KISITI":
                     uyarilar.append("Kontenjan reddi: yetersizlik ima edilmemeli; gelişim önerisi ve vaat olmamalı.")
+                    if not any(r.get("kaynak_rolu") == "IK_YETKILISI" for r in tum_dayanak):
+                        bulgular.append(Bulgu("KONTENJAN_KAYDI_YOK", "Kontenjan gerekçesinin dayandığı idari kayıt bulunamadı.", [n["kaynak_id"]]))
+                if gerekce == "GEREKLILIK_KARSILANMADI":
+                    for r in tum_dayanak:
+                        if isinstance(r.get("gozlem_metni"), str) and OLUMLU_GOZLEM.search(r["gozlem_metni"]):
+                            bulgular.append(Bulgu("GOZLEM_GEREKCE_CELISKI", f"{r['kaynak_id']} beklentinin karşılandığını söylüyor; "
+                                                  "İK gerekçesi karşılanmadığını söylüyor.", [r["kaynak_id"], n["kaynak_id"]]))
 
         degerlendirici = asama_satirlari[asama_satirlari["gereklilik_kodu"].notna()
                                          & asama_satirlari["duzelttigi_kaynak_id"].isna()
@@ -227,6 +242,8 @@ class KuralMotoru:
                 bulgular.append(Bulgu("SONUC_BARAJ", f"{d}: kayıtlı sonuç barajla çelişiyor.", [d]))
             if karardan and r.get("kayitli_sonuc") == "GECTI":
                 bulgular.append(Bulgu("GECILEN_DAYANAK", f"{d}: geçilen görüşme ret dayanağı gösterilmiş.", [d]))
+            if karardan and _bos(r.get("gozlem_metni")):
+                bulgular.append(Bulgu("GOZLEM_YOK", f"{d}: İngilizce görüşmesinin değerlendirici gözlemi yok.", [d]))
 
 
 def ozet(degerlendirmeler):

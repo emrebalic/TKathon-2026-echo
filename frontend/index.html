@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Junior Wings · Geri bildirim paneli</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['"IBM Plex Sans"', 'system-ui', 'sans-serif'], mono: ['"IBM Plex Mono"', 'ui-monospace', 'monospace'] },
+          colors: { murekkep: '#13233f', gok: '#1f5fbf', zemin: '#f4f6fa' },
+        },
+      },
+    };
+  </script>
+  <style>
+    body { font-feature-settings: "tnum"; }
+    textarea { field-sizing: content; }
+    .sekme[aria-selected="true"] { border-color: #1f5fbf; color: #1f5fbf; }
+    .sekme[aria-selected="false"] { border-color: transparent; color: #64748b; }
+  </style>
+</head>
+<body class="bg-zemin text-slate-800 font-sans antialiased min-h-screen">
+  <header class="bg-murekkep text-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex flex-wrap items-center gap-4 justify-between">
+      <div>
+        <p class="text-xs uppercase tracking-widest text-blue-200">TKATHON 2026 · İK paneli</p>
+        <h1 class="text-xl font-semibold">Junior Wings geri bildirim</h1>
+      </div>
+      <div class="flex flex-wrap items-center gap-3">
+        <span id="dosya-bilgi" class="text-sm text-blue-100"></span>
+        <label class="cursor-pointer inline-flex items-center gap-2 bg-white text-murekkep text-sm font-medium px-4 py-2 rounded-lg hover:bg-blue-50">
+          <span>ATS Excel dosyası yükle</span>
+          <input id="dosya" type="file" accept=".xlsx" class="hidden">
+        </label>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 py-6 space-y-6">
+    <section id="bos" class="hidden bg-white rounded-xl border border-dashed border-slate-300 p-10 text-center">
+      <h2 class="text-lg font-semibold">Başlamak için ATS Excel dosyasını yükleyin</h2>
+      <p class="mt-2 text-sm text-slate-500 max-w-xl mx-auto">Panel bütün başvuruları okur, kayıtlı karara göre ayırıp sayar ve
+        dayanağı sorunlu başvuruları e-posta üretmeden İK'ya ayırır. Veri değiştiğinde dosyayı yeniden yükleyin.</p>
+    </section>
+
+    <section id="ozet" class="hidden space-y-3"></section>
+
+    <nav id="sekmeler" class="hidden flex gap-1 border-b border-slate-200">
+      <button data-sekme="basvurular" class="sekme px-4 py-2 text-sm font-medium border-b-2 -mb-px">Başvurular</button>
+      <button data-sekme="ik" class="sekme px-4 py-2 text-sm font-medium border-b-2 -mb-px">İK incelemesi</button>
+      <button data-sekme="isyuku" class="sekme px-4 py-2 text-sm font-medium border-b-2 -mb-px">İş yükü</button>
+    </nav>
+
+    <section id="icerik"></section>
+  </main>
+
+  <div id="cekmece" class="hidden fixed inset-0 z-40">
+    <div id="perde" class="absolute inset-0 bg-slate-900/40"></div>
+    <aside class="absolute right-0 top-0 h-full w-full max-w-6xl bg-zemin shadow-2xl overflow-y-auto">
+      <div id="detay"></div>
+    </aside>
+  </div>
+
+  <div id="bildirim" class="hidden fixed bottom-4 left-1/2 -translate-x-1/2 z-50 px-4 py-3 rounded-lg text-sm shadow-lg max-w-lg"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>

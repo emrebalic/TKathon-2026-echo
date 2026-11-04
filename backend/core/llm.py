@@ -1,10 +1,10 @@
 """Meta Model API (Muse Spark) istemcisi.
 
 Meta'nın OpenAI uyumlu Chat Completions uç noktasını kullanır. Her çağrının girdisi ve ham
-yanıtı store/ai_kayitlari.jsonl dosyasına eklenir (teslimde istenen "yapay zekâya verilen
-girdiler ve ham yanıtlar").
+yanıtı backend/logs/{Başvuru ID}_{zaman}.json dosyasına yazılır (teslimde istenen "yapay zekâya
+verilen girdiler ve ham yanıtlar").
 
-Ayarlar .env dosyasından okunur: MODEL_API_KEY (zorunlu), MODEL_ID, MODEL_API_BASE_URL.
+Ayarlar depo kökündeki .env dosyasından okunur: MODEL_API_KEY (zorunlu), MODEL_ID, MODEL_API_BASE_URL.
 """
 import json
 import os
@@ -17,12 +17,12 @@ from pathlib import Path
 from dotenv import load_dotenv
 from openai import OpenAI
 
-KOK = Path(__file__).resolve().parents[1]
-load_dotenv(KOK / ".env")
+BACKEND = Path(__file__).resolve().parents[1]
+load_dotenv(BACKEND.parent / ".env")
 
 BASE_URL = os.getenv("MODEL_API_BASE_URL", "https://api.meta.ai/v1")
 MODEL = os.getenv("MODEL_ID", "muse-spark-1.3")
-KAYIT_DOSYASI = KOK / "store" / "ai_kayitlari.jsonl"
+LOG_DIZINI = Path(os.getenv("MVP_LOG_DIZINI", BACKEND / "logs"))
 
 
 class ModelHatasi(RuntimeError):
@@ -47,9 +47,10 @@ def _istemci():
 
 
 def _kaydet(kayit):
-    KAYIT_DOSYASI.parent.mkdir(exist_ok=True)
-    with KAYIT_DOSYASI.open("a", encoding="utf-8") as f:
-        f.write(json.dumps(kayit, ensure_ascii=False, default=str) + "\n")
+    LOG_DIZINI.mkdir(parents=True, exist_ok=True)
+    zaman = datetime.now().strftime("%Y%m%d-%H%M%S")
+    ad = f"{kayit.get('basvuru_id') or 'genel'}_{zaman}_{kayit['cagri_id']}.json"
+    (LOG_DIZINI / ad).write_text(json.dumps(kayit, ensure_ascii=False, indent=2, default=str), encoding="utf-8")
 
 
 def cagir(sistem: str, kullanici: str, sema: dict | None = None, amac: str = "", basvuru_id: str = "") -> Yanit:

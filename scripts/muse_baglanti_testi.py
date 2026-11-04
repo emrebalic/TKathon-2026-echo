@@ -1,11 +1,11 @@
 """Muse API bağlantısını ve JSON şeması desteğini dener.
 
-Çalıştırma: python tools/muse_baglanti_testi.py
+Çalıştırma (depo kökünden): uv run --directory backend python ../scripts/muse_baglanti_testi.py
 """
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "backend"))
 sys.stdout.reconfigure(encoding="utf-8")
 
 from core.llm import BASE_URL, MODEL, ModelHatasi, cagir  # noqa: E402

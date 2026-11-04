@@ -1,79 +1,67 @@
 # Junior Wings geri bildirim MVP'si (TKATHON 2026)
 
-Olumsuz sonuçlanan Junior Wings başvuruları için, ATS kayıtlarına dayanan ve İK onayından geçen
-geri bildirim e-postası taslakları üretir. Kararı değiştirmez; dayanağı eksik, çelişkili,
-düzeltilmiş ya da paylaşımı onaylanmamış başvuruları e-posta üretmeden İK'ya ayırır.
+Olumsuz sonuçlanan Junior Wings başvuruları için ATS kayıtlarına dayanan, Meta Muse ile yazılan ve İK onayından
+geçen geri bildirim e-postası taslakları. Kararı değiştirmez; dayanağı eksik, çelişkili, düzeltilmiş ya da paylaşımı
+onaylanmamış başvuruları e-posta üretmeden İK'ya ayırır.
 
-## Kurulum
+**Yığın:** FastAPI + uv (backend, bütün kurallar) · tek sayfa HTML + Tailwind (frontend, yalnız gösterim) · SQLite · Meta Model API (`muse-spark-1.3`).
 
-```bash
-python -m venv .venv
-.venv\Scripts\activate
-pip install -r requirements.txt
-copy .env.example .env
-```
+## Çalıştırma
 
-Yarışma dosyalarını `data/raw/` içine kopyalayın (git'e girmez): `02_Veriler.xlsx`, `06_Ek_Gorev_Ornekleri.xlsx`.
-
-## Çalıştırma ve test
+Gereken: [uv](https://docs.astral.sh/uv/) ve internet (Muse ve Tailwind CDN).
 
 ```bash
-streamlit run app/main.py
-pytest
+uv sync --directory backend
 ```
 
-Arayüz `http://localhost:8501` adresinde açılır. ATS Excel dosyasını soldan yükleyin; veri değiştiğinde
-dosyayı yeniden yükleyin. Panel yeni dosyayı aynı oturumdaki bir önceki yüklemeyle karşılaştırır ve kaydı
-değişen, yeni gelen ve dosyadan çıkan başvuruları üstte listeler. Değişen başvuruların eski taslağı ve İK
-onayı geçersiz sayılır.
-
-## Yapay zekâ: Meta Muse
-
-`core/llm.py`, Meta Model API'nin OpenAI uyumlu uç noktasını (`https://api.meta.ai/v1`, model `muse-spark-1.3`)
-çağırır ve her çağrının girdisini ve ham yanıtını `store/ai_kayitlari.jsonl` dosyasına yazar.
-Anahtarı `.env` içine `MODEL_API_KEY` olarak koyup bağlantıyı deneyin:
+Depo kökünde `.env` dosyası oluşturun (`.env.example`'ı kopyalayın) ve `MODEL_API_KEY` satırına Meta Model API anahtarını yazın.
 
 ```bash
-python tools/muse_baglanti_testi.py
+uv run --directory backend uvicorn app.main:app --reload
 ```
+
+Tarayıcıda **http://localhost:8000** adresini açın ve "ATS Excel dosyası yükle" ile `02_Veriler.xlsx`'i yükleyin.
+
+- Testler: `uv run --directory backend pytest`
+- Muse bağlantısı: `uv run --directory backend python ../scripts/muse_baglanti_testi.py`
+
+Testler ve betikler `data/raw/02_Veriler.xlsx` dosyasını bekler (git'e girmez; yarışma dosyasını kopyalayın).
+
+## Akış
+
+1. **Yükleme ve sayım:** toplam, OLUMSUZ / KABUL / DEVAM_EDIYOR, veri sorunu; olumsuzlarda taslağı hazırlanan / İK incelemesine ayrılan / henüz işlenmeyen.
+2. **Ön kontrol** (kod): dayanak bulunamadı ya da başka başvuruya ait, dayanak düzeltilmiş, sınav sayıları tutarsız ya da geçilen bölüm, görüşmede gözlem yok, İK notu / gerekçe / teyit eksik, KURUM_ICI dayanak, kişilik yargısı, kontenjanın idari kaydı yok, çelişkili gözlem → e-posta üretilmez, İK'ya.
+3. **Taslak** (Muse): yalnız o başvurunun paylaşılabilir kayıtları; aşamaya göre istem bloğu; JSON çıktı (`email_konu`, `email_metni`, `kullanilan_kayit_idleri`, `emin_olunmayan_noktalar`).
+4. **Son kontrol** (kod): kayıt ID'leri, kayıtta olmayan sayı, yasaklı ifadeler, iç kodlar, 80–120 kelime, Başvuru ID. Sorun varsa "İK dikkat"; otomatik düzeltme yok.
+5. **İK:** düzenle, kaydet, onayla. İlk taslak, İK düzeltmesi ve onay ayrı saklanır. Girdi değişirse taslak ve onay, metin değişirse onay düşer.
+6. **Dışa aktarım:** İK listesi ve İK düzeltmeleri Excel olarak. Her model çağrısı `backend/logs/` altında JSON.
+7. **İş yükü:** elle süreç (259,2 sa / 43,2 gün) ve önerilen süreç; dakikalar değiştirilerek duyarlılık.
+
+**İkinci yapay zekâ yolu:** Yanıtlar dışarıda üretildiyse Başvurular sekmesindeki "Hazır yanıt dosyası yükle" ile Excel ya da JSON yüklenir
+(sütunlar: `basvuru_id`, `email_konu`, `email_metni`, `kullanilan_kayit_idleri`). Başvuru ID'si eşleşmeyen yanıt onaya açılmaz.
+
+## Üç test
+
+```bash
+uv run --directory backend python ../scripts/alt_kume_olustur.py
+```
+
+Bu komut `data/test/` altına `Veriler_40_basvuru.xlsx`, `Veriler_60_basvuru.xlsx` ve `Veriler_degisen_BSV-002.xlsx` üretir.
+
+1. **Olağan başvuru:** `02_Veriler.xlsx` → BSV-001 ya da BSV-002 → taslak üret → dayandığı kayıtlar → İK onayla.
+2. **Yeni dosya:** `Veriler_40_basvuru.xlsx` yükle → toplam 40, listeler güncel.
+3. **Değişen veri:** BSV-002'yi onayla → `Veriler_degisen_BSV-002.xlsx` yükle → BSV-002 "Geçersiz – veri değişti"; yeniden üret.
+
+Aynı akışlar `backend/tests/test_akis.py` içinde sahte modelle otomatik test edilir.
 
 ## Klasörler
 
 | Yol | İçerik |
 |---|---|
-| `core/schema.py` | Excel başlıklarını Alan Sözlüğü'ndeki teknik adlara eşler (’ ve ' farkını yok sayar) |
-| `core/loader.py` | Dosyayı okur, zorunlu sayfa ve sütunları doğrular |
-| `core/rules.py` | Kural motoru: başvuruları Taslağa uygun / İK incelemesi / Kapsam dışı olarak ayırır, dayanak kayıtlarını ve parmak izini çıkarır |
-| `core/degisiklik.py` | İki yükleme arasında değişen başvuruları bulur |
-| `core/llm.py` | Muse Spark istemcisi ve yapay zekâ girdi/yanıt kaydı |
-| `tools/muse_baglanti_testi.py` | API anahtarı ve JSON şeması desteği denemesi |
-| `app/main.py` | Streamlit İK paneli |
-| `tests/` | Sayım, İK listesi, farklı kayıt sayısı, veri değişikliği ve yeniden yükleme testleri |
-| `docs/ANALIZ.md` | Veri analizi bulguları ve tuzak listesi |
-| `data/test/` | 40 / 60 satırlık ve değiştirilmiş test dosyaları |
-
-## Ekip ve dallar
-
-Herkes kendi dalında çalışır, küçük parçalar halinde `main`'e birleştirir.
-
-| Dal | Sorumluluk | Sıradaki iş |
-|---|---|---|
-| `backend` | Veri ve kural motoru | Taslak / düzeltme / onay deposu (`store/`), parmak izi ile onay geçersizleştirme |
-| `ai` | Yapay zekâ | Taslak istemi (yalnız paylaşılabilir alanlar, JSON çıktı) ve çıktı doğrulayıcı (iç kod, CEFR, vaat, kontenjanda yetersizlik ifadesi) |
-| `ui` | Arayüz | Taslak düzenleme ve onay akışı, durum sayıları (hazırlanan / bekleyen / işlenmeyen) |
-| `ideathon` | İçerik | A–G iletişim kararları, İK kontrol süresi ölçümü, iş yükü Excel'i, 1 sayfalık .docx |
-| `sunum` | Test ve sunum | Test dosyaları, 3 testin ekran görüntüleri, pptx, 90 sn video, ek görevler |
-
-## Teslim (son saat 16.45)
-
-1. Bir sayfalık çözüm özeti (.docx)
-2. MVP (.zip ya da bu deponun linki) ve çalıştırma notu; kullanılıyorsa API anahtarı, yapay zekâ girdileri ve ham yanıtlar
-3. Hesap ve test dosyası (üç testin ekran görüntüleri)
-4. Sunum (.pptx) ve en fazla 90 saniyelik video
-5. Ek görevler (ayrı dosyalar, ör. `Ek_Gorev_8`)
-
-## Kırmızı çizgiler
-
-Kararı değiştirmek, başka başvurunun bilgisini kullanmak, kurum içi bilgiyi paylaşmak, kayıtta olmayan
-iddia eklemek, kontenjan adayına yetersizlik ima etmek, başarı veya işe alım vaadi vermek, e-postayı İK
-onayı olmadan göndermek.
+| `backend/` | FastAPI, kural motoru, istem, son kontrol, SQLite, testler |
+| `frontend/` | Tek sayfa İK paneli |
+| `scripts/` | Test dosyası üretici, Muse bağlantı testi |
+| `docs/` | Vaka, görev tanımı, kararlar, tuzaklar, iş yükü, sunum, plan |
+| `teslim/` | Teslim listesi, doldurulmuş çözüm özeti |
+| `tools/analiz/` | Veri analizi betikleri |
+| `materials/`, `data/raw/` | Yarışma dosyaları (yalnız yerelde) |

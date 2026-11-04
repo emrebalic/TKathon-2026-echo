@@ -3,9 +3,9 @@
   "configurations": [
     {
       "name": "mvp",
-      "runtimeExecutable": ".venv/Scripts/python.exe",
-      "runtimeArgs": ["-m", "streamlit", "run", "app/main.py", "--server.port", "8501", "--server.headless", "true"],
-      "port": 8501
+      "runtimeExecutable": "uv",
+      "runtimeArgs": ["run", "--directory", "backend", "uvicorn", "app.main:app", "--port", "8000"],
+      "port": 8000
     }
   ]
 }
