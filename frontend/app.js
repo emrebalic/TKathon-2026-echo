@@ -1,5 +1,5 @@
 // Arayüz yalnız gösterir; bütün kurallar backend'de. Veri metinleri esc() ile kaçırılır.
-const S = { ozet: null, liste: [], grup: "tum", asama: "", ara: "", sekme: "basvurular", detay: null, mesgul: false };
+const S = { ozet: null, liste: [], grup: "tum", asama: "", ara: "", sekme: "basvurular", detay: null, mesgul: false, dil: "tr" };
 const $ = (id) => document.getElementById(id);
 const esc = (v) => String(v ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
 const sayi = (v, k = 1) => (typeof v === "number" ? v.toLocaleString("tr-TR", { maximumFractionDigits: k }) : "—");
@@ -236,6 +236,11 @@ function taslakAlani(d) {
       <div class="flex flex-wrap items-center gap-2">${taslakRozetleri(t.durum)}
         ${t.ik_duzeltti ? rozet(`İK düzeltmesi kaydedildi · ${new Date(t.ik_zaman).toLocaleTimeString("tr-TR", { hour: "2-digit", minute: "2-digit" })}`, "onaylandi") : ""}
         <span class="text-xs text-slate-400 ml-auto">${esc(t.kaynak_turu === "dosya" ? "yanıt dosyasından" : t.model)} · ${esc(t.olusturma.replace("T", " "))}</span></div>
+      <div class="inline-flex rounded-lg ring-1 ring-slate-300 p-0.5 text-sm" role="tablist" aria-label="E-posta dili">
+        ${[["tr", "Türkçe"], ["en", t.ingilizce ? "English" : "English · oluştur"]].map(([k, ad]) => `<button data-dil="${k}" role="tab" aria-selected="${S.dil === k}"
+          class="px-3 py-1 rounded-md ${S.dil === k ? "bg-murekkep text-white" : "text-slate-600 hover:bg-slate-50"}">${ad}</button>`).join("")}
+      </div>
+      ${S.dil === "en" ? ingilizceAlani(t, gecersiz) : `
       ${gecersiz ? kutu("kirmizi", "Veri değişti: bu taslak ve onayı geçersiz", "Kayıtlar taslak üretildikten sonra değişti. Yeni taslak üretin.") : ""}
       ${t.durum.kod === "onay_dustu" ? kutu("sari", "Onay düştü", "Onaydan sonra metin değişti; güncel metni yeniden onaylayın.") : ""}
       <label class="block text-xs font-medium text-slate-500">Konu
@@ -253,7 +258,33 @@ function taslakAlani(d) {
         <button id="onayla" class="text-sm px-4 py-2 rounded-lg bg-emerald-600 text-white font-medium hover:bg-emerald-700 disabled:opacity-50" ${gecersiz || t.durum.kod === "onaylandi" ? "disabled" : ""}>İK onayla</button>
         <button id="uret" class="text-sm px-4 py-2 rounded-lg text-gok hover:underline ml-auto disabled:opacity-60" ${S.mesgul ? "disabled" : ""}>${S.mesgul ? "Muse yazıyor…" : "Yeniden üret"}</button>
       </div>
-      <p class="text-xs text-slate-400">Gönderim düğmesi yok: e-posta yalnız İK onayından sonra, sistem dışında gönderilir.</p>
+      <p class="text-xs text-slate-400">Gönderim düğmesi yok: e-posta yalnız İK onayından sonra, sistem dışında gönderilir.</p>`}
+    </div>`;
+}
+
+function ingilizceAlani(t, gecersiz) {
+  if (gecersiz) return kutu("kirmizi", "Veri değişti", "Önce Türkçe taslağı yeniden üretin; İngilizce sürüm güncel Türkçe metinden oluşturulur.");
+  const en = t.ingilizce;
+  const dugme = (metin) => `<button id="cevir" class="text-sm px-4 py-2 rounded-lg bg-gok text-white font-medium hover:bg-thykoyu disabled:opacity-60" ${S.mesgul ? "disabled" : ""}>
+    ${S.mesgul ? "Muse çeviriyor…" : metin}</button>`;
+  if (!en)
+    return `<div class="rounded-lg ring-1 ring-slate-200 p-6 text-center space-y-3">
+      <p class="text-sm text-slate-600">İngilizce sürüm henüz yok. Muse, ekrandaki güncel Türkçe metni başvurunun kayıtlarıyla birlikte o anda çevirir;
+        karar, gerekçe, sayılar, Başvuru ID ve üslup korunur.</p>${dugme("İngilizce sürümünü oluştur")}</div>`;
+  const kontrol = en.kontrol.length
+    ? kutu("sari", `Bağlam kontrolü: ${en.kontrol.length} uyarı`, `<ul class="list-disc ml-5">${en.kontrol.map((k) => `<li>${esc(k.aciklama)}</li>`).join("")}</ul>`)
+    : kutu("yesil", "Bağlam kontrolü: Türkçe metinle tutarlı", "Sayılar, Başvuru ID, uzunluk ve yasaklı ifadeler kontrol edildi.");
+  return `
+    ${en.guncel ? "" : kutu("sari", "Türkçe metin değişti", "Bu İngilizce sürüm önceki Türkçe metinden oluşturuldu; yeniden oluşturun.")}
+    <label class="block text-xs font-medium text-slate-500">Subject
+      <input class="mt-1 w-full rounded-lg ring-1 ring-slate-200 bg-slate-50 px-3 py-2 text-sm" value="${esc(en.konu)}" readonly></label>
+    <label class="block text-xs font-medium text-slate-500">Email body <span class="font-normal">(${en.metin.split(/\s+/).filter(Boolean).length} words)</span>
+      <textarea rows="10" class="mt-1 w-full rounded-lg ring-1 ring-slate-200 bg-slate-50 px-3 py-2 text-sm leading-relaxed" readonly>${esc(en.metin)}</textarea></label>
+    ${kontrol}
+    ${en.notlar.length ? kutu("gri", "Modelin anlam farkı notları", `<ul class="list-disc ml-5">${en.notlar.map((x) => `<li>${esc(x)}</li>`).join("")}</ul>`) : ""}
+    <div class="flex flex-wrap items-center gap-2 pt-2 border-t border-slate-100">
+      ${dugme("Yeniden oluştur")}
+      <span class="text-xs text-slate-400">${esc(new Date(en.zaman).toLocaleTimeString("tr-TR", { hour: "2-digit", minute: "2-digit" }))} · İK onayı Türkçe metin içindir.</span>
     </div>`;
 }
 
@@ -411,6 +442,9 @@ $("detay").addEventListener("click", (e) => {
   const b = S.detay && encodeURIComponent(S.detay.basvuru_id);
   if (e.target.id === "kapat") $("cekmece").classList.add("hidden");
   if (e.target.id === "uret") detayEylem(() => api(`/api/basvurular/${b}/taslak`, { method: "POST" }));
+  const dil = e.target.closest("[data-dil]");
+  if (dil) { S.dil = dil.dataset.dil; detayCiz(); }
+  if (e.target.id === "cevir") detayEylem(() => api(`/api/basvurular/${b}/ingilizce`, { method: "POST" }), "İngilizce sürüm oluşturuldu.");
   if (e.target.id === "kaydet") {
     const govde = JSON.stringify({ konu: $("konu").value, metin: $("metin").value });
     detayEylem(() => api(`/api/basvurular/${b}/duzeltme`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: govde }),

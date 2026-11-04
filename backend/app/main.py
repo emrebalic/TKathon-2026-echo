@@ -18,6 +18,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from core import llm
+from core.ceviri import cevir
 from core.depo import Depo, durum, guncel_metin, metin_hash
 from core.girdi import model_girdisi
 from core.is_yuku import hesapla
@@ -143,6 +144,11 @@ def create_app(veri_dizini: Path | None = None, cagir=None, on_uretim: bool | No
             "kontrol": guncel_kontrol(t), "kelime": len(metin.split()),
             "model": t["model"], "kaynak_turu": t["kaynak"], "olusturma": t["olusturma"],
             "durum": {**durum(t, g[1] if g else None, s["zaman"]), "ik_dikkat": bool(guncel_kontrol(t))},
+            "ingilizce": ({
+                "konu": t["en_konu"], "metin": t["en_metin"], "zaman": t["en_zaman"],
+                "notlar": json.loads(t["en_notlar"] or "[]"), "kontrol": json.loads(t["en_kontrol"] or "[]"),
+                "guncel": t["en_kaynak_hash"] == metin_hash(konu, metin),
+            } if t.get("en_metin") else None),
         }
 
     def guncel_kontrol(t):
@@ -283,6 +289,24 @@ def create_app(veri_dizini: Path | None = None, cagir=None, on_uretim: bool | No
         if guncel_kontrol(t) and not govde.uyarilari_okudum:
             raise HTTPException(409, detail="Son kontrolde uyarılar var; okuduğunuzu işaretleyip yeniden onaylayın.")
         depo.onayla(t["id"], metin_hash(*guncel_metin(t)))
+        return detay(b)
+
+    @app.post("/api/basvurular/{b}/ingilizce")
+    def ingilizce(b: str):
+        """Güncel Türkçe metnin İngilizce sürümünü o anda üretir; bağlam için başvurunun kayıtları da verilir."""
+        basvuru(b)
+        t = depo.son(b)
+        g = s["girdiler"].get(b)
+        if not t:
+            raise HTTPException(404, detail="Önce Türkçe taslak gerekli.")
+        if not g or t["girdi_hash"] != g[1]:
+            raise HTTPException(409, detail="Veri değişti; önce Türkçe taslağı yeniden üretin.")
+        konu, metin = guncel_metin(t)
+        try:
+            sonuc = cevir(json.loads(t["girdi_json"]), konu, metin, cagir)
+        except llm.ModelHatasi as exc:
+            raise HTTPException(502, detail=str(exc)) from exc
+        depo.ingilizce_kaydet(t["id"], metin_hash(konu, metin), sonuc)
         return detay(b)
 
     @app.post("/api/yanitlar")

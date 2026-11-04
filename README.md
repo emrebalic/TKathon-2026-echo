@@ -35,7 +35,8 @@ Testler ve betikler `data/raw/02_Veriler.xlsx` dosyasını bekler (git'e girmez;
    Dosya yüklenince geçerli taslağı olmayan bütün uygun başvuruların taslakları arka planda (aynı anda 5 çağrı) hazırlanır; başvuruya tıklayınca taslak hazır açılır. Aynı dosya yeniden yüklenirse yalnız verisi değişen başvurular yeniden üretilir. Kapatmak için `.env`'e `MVP_ON_URETIM=0`.
 4. **Son kontrol** (kod): kayıt ID'leri, kayıtta olmayan sayı, yasaklı ifadeler, iç kodlar, en fazla 120 kelime, Başvuru ID. Sorun varsa "İK dikkat"; otomatik düzeltme yok.
 5. **İK:** düzenle, kaydet, onayla. İlk taslak, İK düzeltmesi ve onay ayrı saklanır. Girdi değişirse taslak ve onay, metin değişirse onay düşer.
-6. **Dışa aktarım:** İK listesi ve İK düzeltmeleri Excel olarak. Her model çağrısı `backend/logs/` altında JSON.
+6. **İngilizce sürüm (isteğe bağlı):** Taslağın üstündeki "English" sekmesinden o anda üretilir. Muse güncel Türkçe metni başvurunun kayıtlarıyla birlikte çevirir; sayılar, Başvuru ID, yasaklı ifadeler ve uzunluk kod ile karşılaştırılır. Türkçe metin değişirse İngilizce sürüm "eski" olarak işaretlenir.
+7. **Dışa aktarım:** İK listesi ve İK düzeltmeleri Excel olarak. Her model çağrısı `backend/logs/` altında JSON.
 7. **İş yükü:** elle süreç (259,2 sa / 43,2 gün) ve önerilen süreç; dakikalar değiştirilerek duyarlılık.
 
 **İkinci yapay zekâ yolu:** Yanıtlar dışarıda üretildiyse Başvurular sekmesindeki "Hazır yanıt dosyası yükle" ile Excel ya da JSON yüklenir

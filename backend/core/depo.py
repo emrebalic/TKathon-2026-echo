@@ -34,6 +34,8 @@ CREATE TABLE IF NOT EXISTS taslaklar (
 CREATE INDEX IF NOT EXISTS ix_taslak_basvuru ON taslaklar (basvuru_id, id);
 """
 
+EN_SUTUNLARI = ("en_konu", "en_metin", "en_notlar", "en_kontrol", "en_kaynak_hash", "en_zaman")
+
 DURUM_ADLARI = {
     "gecersiz": "Geçersiz – veri değişti",
     "onay_dustu": "Onay düştü – metin değişti",
@@ -56,6 +58,18 @@ class Depo:
         self.yol = yol
         with self._baglan() as db:
             db.executescript(SEMA)
+            # Eski veritabanlarına İngilizce sürüm sütunlarını ekle.
+            var = {r["name"] for r in db.execute("PRAGMA table_info(taslaklar)")}
+            for sutun in EN_SUTUNLARI:
+                if sutun not in var:
+                    db.execute(f"ALTER TABLE taslaklar ADD COLUMN {sutun} TEXT")
+
+    def ingilizce_kaydet(self, taslak_id, kaynak_hash, ceviri):
+        """İngilizce sürüm, çevrildiği Türkçe metnin hash'iyle saklanır; Türkçe değişirse eskimiş sayılır."""
+        with self._baglan() as db:
+            db.execute("UPDATE taslaklar SET en_konu=?, en_metin=?, en_notlar=?, en_kontrol=?, en_kaynak_hash=?, en_zaman=? "
+                       "WHERE id=?", (ceviri["konu"], ceviri["metin"], json.dumps(ceviri["notlar"], ensure_ascii=False),
+                                      json.dumps(ceviri["kontrol"], ensure_ascii=False), kaynak_hash, _simdi(), taslak_id))
 
     def _baglan(self):
         db = sqlite3.connect(self.yol, timeout=30)

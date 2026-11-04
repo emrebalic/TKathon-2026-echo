@@ -63,6 +63,13 @@ def test_son_kontrol_hatalari_yakalar(motor):
 
 
 def _sahte_model(sistem, kullanici, sema, amac="", basvuru_id=""):
+    if amac == "ingilizce":
+        b = basvuru_id
+        govde = " ".join(["Thank you for your interest in the Junior Wings assessment process."] * 9)
+        veri = {"email_subject": f"About your application {b}",
+                "email_body": govde + f" You can send your questions with application ID {b} by replying to this email.",
+                "anlam_farki_notlari": []}
+        return Yanit("sahte", "sahte-model", json.dumps(veri), veri, 0.0)
     girdi = json.loads(kullanici.split("\n", 1)[1])
     b = girdi["basvuru_id"]
     metin = " ".join(["Junior Wings değerlendirme sürecine gösterdiğiniz ilgi için teşekkür ederiz."] * 9)
@@ -191,3 +198,27 @@ def test_mulakat_blogu_ve_istem_degisince_taslak_yenilenir(motor, monkeypatch):
     monkeypatch.setitem(istem_modulu.BLOKLAR, "mulakat", istem_modulu.BLOKLAR["mulakat"] + " Ek kural.")
     assert taslak_anahtari(video) != once[0]   # yalnız istemi değişen başvurunun taslağı düşer
     assert taslak_anahtari(grup) == once[1]
+
+
+@veri_gerekli
+def test_ingilizce_surum_o_anda_uretilir_ve_turkce_degisince_eskir(istemci):
+    _yukle(istemci, VERI)
+    istemci.post("/api/basvurular/BSV-002/taslak")
+    assert istemci.get("/api/basvurular/BSV-002").json()["taslak"]["ingilizce"] is None
+    d = istemci.post("/api/basvurular/BSV-002/ingilizce").json()
+    en = d["taslak"]["ingilizce"]
+    assert en["guncel"] and "BSV-002" in en["metin"] and en["kontrol"] == []
+    t = d["taslak"]
+    istemci.put("/api/basvurular/BSV-002/duzeltme", json={"konu": t["konu"], "metin": t["metin"] + " Saygılarımızla."})
+    assert istemci.get("/api/basvurular/BSV-002").json()["taslak"]["ingilizce"]["guncel"] is False
+
+
+def test_ceviri_kontrolu_sayi_ve_kimlik_farkini_yakalar():
+    from core.ceviri import kontrol
+    girdi = {"basvuru_id": "BSV-001", "gerekce_turu": "sinav"}
+    tr = "İngilizce bölümünde 15 sorunun 6'sına doğru yanıt verdiniz; geçme barajı 10 doğruydu. BSV-001"
+    iyi = "You answered 6 of 15 questions correctly in the English section; the pass mark was 10. BSV-001"
+    assert kontrol(girdi, "Konu", tr, "Subject", iyi) == []
+    kotu = "You answered 7 of 15 questions; your English level is B2."
+    kodlar = {s["kod"] for s in kontrol(girdi, "Konu", tr, "Subject", kotu)}
+    assert {"SAYI_FARKI", "BASVURU_ID_YOK", "YASAK_IFADE"} <= kodlar
