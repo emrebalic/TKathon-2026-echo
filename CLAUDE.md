@@ -40,4 +40,4 @@ uv run --directory backend python ../scripts/muse_baglanti_testi.py
 
 - Tanımlayıcılar ve arayüz metinleri Türkçe; yorumlar seyrek.
 - Kural değişikliğinde `backend/tests/` güncellenir; `main`'e yalnız testleri geçen kod girer.
-- `.env`, `data/raw/`, `data/test/*.xlsx`, `materials/`, `backend/data/`, `backend/logs/` git'e girmez.
+- `.env`, `data/raw/`, `materials/`, `backend/data/`, `backend/logs/` git'e girmez.

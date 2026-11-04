@@ -17,9 +17,6 @@ store/
 backend/data/
 backend/logs/
 
-# Yarışma verisinden üretilen test dosyaları
-data/test/*.xlsx
-
 # Excel ve işletim sistemi kalıntıları
 ~$*.xlsx
 .DS_Store
