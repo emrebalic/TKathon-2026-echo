@@ -12,7 +12,7 @@
       theme: {
         extend: {
           fontFamily: { sans: ['"IBM Plex Sans"', 'system-ui', 'sans-serif'], mono: ['"IBM Plex Mono"', 'ui-monospace', 'monospace'] },
-          colors: { murekkep: '#13233f', gok: '#1f5fbf', zemin: '#f4f6fa' },
+          colors: { thy: '#C8102E', thykoyu: '#A50D25', murekkep: '#232B38', gok: '#C8102E', zemin: '#F4F4F5' },
         },
       },
     };
@@ -20,7 +20,7 @@
   <style>
     body { font-feature-settings: "tnum"; }
     textarea { field-sizing: content; }
-    .sekme[aria-selected="true"] { border-color: #1f5fbf; color: #1f5fbf; }
+    .sekme[aria-selected="true"] { border-color: #C8102E; color: #C8102E; }
     .sekme[aria-selected="false"] { border-color: transparent; color: #64748b; }
     .serit-hazirlaniyor { background-image: repeating-linear-gradient(45deg, #cbd5e1 0 6px, #e2e8f0 6px 12px); background-size: 17px 17px; }
     @media (prefers-reduced-motion: no-preference) {
@@ -30,7 +30,7 @@
   </style>
 </head>
 <body class="bg-zemin text-slate-800 font-sans antialiased min-h-screen">
-  <header class="bg-murekkep text-white relative overflow-hidden">
+  <header class="bg-thy text-white relative overflow-hidden">
     <svg class="absolute -right-10 -top-6 h-64 w-[34rem] text-white/[0.04] pointer-events-none" viewBox="0 0 340 160" fill="currentColor" aria-hidden="true">
       <path d="M10 140 C 90 120, 160 70, 330 10 C 250 70, 200 110, 150 130 C 220 118, 270 100, 320 70 C 260 130, 160 158, 10 140 Z"/>
     </svg>
@@ -42,19 +42,19 @@
           </svg>
         </div>
         <div>
-          <p class="text-[11px] uppercase tracking-[0.2em] text-blue-200/80">TKATHON 2026 · İK paneli</p>
+          <p class="text-[11px] uppercase tracking-[0.2em] text-red-100/90">TKATHON 2026 · İK paneli</p>
           <h1 class="text-xl sm:text-2xl font-semibold leading-tight">Junior Wings geri bildirim</h1>
         </div>
       </div>
       <div class="flex flex-wrap items-center gap-2">
         <div id="dosya-cip" class="hidden items-center gap-2 rounded-lg bg-white/10 ring-1 ring-white/15 px-3 py-2 text-sm">
-          <svg viewBox="0 0 24 24" class="h-4 w-4 text-blue-200" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+          <svg viewBox="0 0 24 24" class="h-4 w-4 text-red-100" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
             <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/>
           </svg>
           <span id="dosya-adi" class="font-medium"></span>
-          <span id="dosya-meta" class="text-blue-200/80"></span>
+          <span id="dosya-meta" class="text-red-100/90"></span>
         </div>
-        <label class="cursor-pointer inline-flex items-center gap-2 bg-white text-murekkep text-sm font-medium px-4 py-2 rounded-lg hover:bg-blue-50 focus-within:ring-2 focus-within:ring-blue-300">
+        <label class="cursor-pointer inline-flex items-center gap-2 bg-white text-thy text-sm font-semibold px-4 py-2 rounded-lg hover:bg-red-50 focus-within:ring-2 focus-within:ring-red-200">
           <svg viewBox="0 0 24 24" class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
             <path d="M12 16V4m0 0-4 4m4-4 4 4M4 20h16"/>
           </svg>

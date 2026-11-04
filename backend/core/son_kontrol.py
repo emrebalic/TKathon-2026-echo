@@ -5,7 +5,7 @@ Sorun bulunursa taslak "İK dikkat" olarak işaretlenir; otomatik düzeltme yap�
 import json
 import re
 
-KELIME_ALT, KELIME_UST = 80, 120
+KELIME_UST = 120
 
 # Küçük harfe çevrilmiş metinde, kelime başından aranır (bkz. _kucuk); "gözden geçirin" gibi kelime içi eşleşmeler sayılmaz.
 YASAK = [
@@ -54,8 +54,8 @@ def kontrol_et(girdi: dict, konu: str, metin: str, kullanilan_idler: list) -> li
         sorunlar.append({"kod": "IC_KOD", "aciklama": f"Kurum içi kod ya da kayıt ID'si metinde: {', '.join(ic)}"})
 
     kelime = len(metin.split())
-    if not KELIME_ALT <= kelime <= KELIME_UST:
-        sorunlar.append({"kod": "UZUNLUK", "aciklama": f"Metin {kelime} kelime; karar {KELIME_ALT}–{KELIME_UST} kelime."})
+    if kelime > KELIME_UST:
+        sorunlar.append({"kod": "UZUNLUK", "aciklama": f"Metin {kelime} kelime; en fazla {KELIME_UST} kelime olmalı."})
     if b not in metin:
         sorunlar.append({"kod": "BASVURU_ID_YOK", "aciklama": f"Metinde Başvuru ID ({b}) yok; aday soru ya da itirazında kullanamaz."})
     return sorunlar

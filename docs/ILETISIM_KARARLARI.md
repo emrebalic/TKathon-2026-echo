@@ -8,7 +8,7 @@ Takımın kararları (`teslim/Cozum_Ozeti.docx`, 02. bölüm). İstem ve son kon
 | **B** Değerlendirici notları | Güncel, paylaşılabilir ve son İK gerekçesiyle tutarlı gözlemleri kısa özetleriz | Ham not kurum içi bilgi taşıyabilir; çok genel açıklama gerekçeyi belirsiz bırakır | BSV-002; AS-002-02; IK-002 |
 | **C** Kontenjan | Kontenjan nedenini açıkça belirtiriz; sonucu adayın eksikliği gibi sunmayız | Kontenjanı gizleyen genel ret, adayın sonucu kendi eksikliği sanmasına yol açar | BSV-008; AS-008-07; IK-008 |
 | **D** Gelişim önerisi | Yalnız çok somut ve paylaşılabilir bir kayda dayanıyorsa kısa, uygulanabilir öneri; zorunlu değil | Herkese genel tavsiye, kayıtta olmayan bir gelişim ihtiyacı ima eder | BSV-002; AS-002-02; IFT-01 |
-| **E** Dil, üslup, uzunluk | Kurumsal ama empatik, açık; yaklaşık 80–120 kelime | Aşırı resmî metin belirsiz; çok uzun metin kontrol ve düzeltme yükünü artırır | "İngilizce bölümünde 15 sorunun 6'sına doğru yanıt verdiniz; geçme barajı 10 doğruydu." |
+| **E** Dil, üslup, uzunluk | Kurumsal ama empatik, açık; en fazla 120 kelime (alt sınır yok) | Aşırı resmî metin belirsiz; çok uzun metin kontrol ve düzeltme yükünü artırır | "İngilizce bölümünde 15 sorunun 6'sına doğru yanıt verdiniz; geçme barajı 10 doğruydu." |
 | **F** Gönderim zamanı | Kontroller tamamlanıp güncel metin İK onayı alınca göndeririz | Aşama sonunda toplu gönderim, onayı tamamlanmış başvuruları da bekletir | İş Yükü Verileri; Planlama Verileri; PK-06 |
 | **G** İtiraz ve soru | Talep Başvuru ID'ye kaydedilir, alındığı bildirilir; İK kayıtları inceleyip yanıtı onaylayınca sonuçlanır. Yapay zekâ taslak desteği verir; tarih ya da sonuç sözü yok | Otomatik ret ya da doğrulamadan puan/karar değiştirmek hatalı sonuç üretir | BSV-033; SN-033-EN-D1; PK-03, PK-06 |
 
@@ -16,7 +16,7 @@ Takımın kararları (`teslim/Cozum_Ozeti.docx`, 02. bölüm). İstem ve son kon
 
 Video mülakat, İK ve birim mülakatı ve sözlü İngilizce mülakatı retlerinde e-posta **daha yumuşak ve daha az ayrıntılı**:
 neden tek cümlede, beceri alanı düzeyinde anlatılır; görev senaryosu, sorular ve yanıtlar aktarılmaz; öneri en fazla
-bir kısa genel cümle; 80–100 kelime. İngilizce mülakatında puan ve baraj tek kısa cümlede kalır. Sınav (A), grup
+bir kısa genel cümle; kısa tutulur. İngilizce mülakatında puan ve baraj tek kısa cümlede kalır. Sınav (A), grup
 çalışması (B) ve kontenjan (C) e-postaları değişmedi. İstem değişince yalnız ilgili başvuruların taslakları yeniden üretilir.
 
 ## Sunumda hazır olunacak soru

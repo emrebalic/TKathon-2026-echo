@@ -27,7 +27,7 @@ const ROZET = {
   OLUMSUZ: "bg-rose-50 text-rose-700 ring-rose-200",
   KABUL: "bg-emerald-50 text-emerald-700 ring-emerald-200",
   DEVAM_EDIYOR: "bg-sky-50 text-sky-700 ring-sky-200",
-  "Taslağa uygun": "bg-indigo-50 text-indigo-700 ring-indigo-200",
+  "Taslağa uygun": "bg-slate-100 text-slate-800 ring-slate-300",
   "İK incelemesi": "bg-amber-50 text-amber-800 ring-amber-200",
   "Kapsam dışı": "bg-slate-100 text-slate-600 ring-slate-200",
   onay_bekliyor: "bg-sky-50 text-sky-700 ring-sky-200",
@@ -80,7 +80,7 @@ function ozetCiz() {
   const o = S.ozet, u = o.uretim || {};
   const parcalar = [
     { grup: "onaylandi", ad: "İK onaylı", n: o.onaylandi, dolgu: "bg-emerald-500", not: "güncel metin onaylandı" },
-    { grup: "hazir", ad: "Taslağı hazır", n: Math.max(0, o.taslak_hazir - o.onaylandi), dolgu: "bg-indigo-500", not: "tıklayınca açılır, İK okuyacak" },
+    { grup: "hazir", ad: "Taslağı hazır", n: Math.max(0, o.taslak_hazir - o.onaylandi), dolgu: "bg-murekkep", not: "tıklayınca açılır, İK okuyacak" },
     { grup: "islenmedi", ad: u.calisiyor ? "Hazırlanıyor" : "Taslağı yok", n: o.islenmedi,
       dolgu: `serit-hazirlaniyor ${u.calisiyor ? "akiyor" : ""}`, not: u.calisiyor ? "Muse yazıyor" : "henüz üretilmedi" },
     { grup: "ik", ad: "İK incelemesi", n: o.ik_incelemesi, dolgu: "bg-amber-400", not: "e-posta üretilmez" },
@@ -97,7 +97,7 @@ function ozetCiz() {
       ? `${TIK}<span class="font-medium">Taslaklar hazır</span><span class="text-slate-500">${sayi(o.taslak_hazir, 0)} taslak${o.ik_dikkat ? ` · ${sayi(o.ik_dikkat, 0)} tanesinde İK dikkat` : ""}</span>`
       : `<span class="text-slate-500">Henüz taslak yok.</span>`;
   const eksik = !u.calisiyor && o.islenmedi
-    ? `<button id="eksikleri-hazirla" class="text-sm px-3 py-1 rounded-lg bg-gok text-white hover:bg-blue-700">${u.hata ? `${u.hata} taslak üretilemedi · yeniden dene` : "Eksik taslakları hazırla"}</button>` : "";
+    ? `<button id="eksikleri-hazirla" class="text-sm px-3 py-1 rounded-lg bg-gok text-white hover:bg-thykoyu">${u.hata ? `${u.hata} taslak üretilemedi · yeniden dene` : "Eksik taslakları hazırla"}</button>` : "";
   $("ozet").innerHTML = `
     <div class="flex flex-wrap items-end gap-x-6 gap-y-4">
       <div><p class="text-xs text-slate-500">Toplam başvuru</p><p class="text-4xl font-semibold tabular-nums leading-none mt-1">${sayi(o.toplam, 0)}</p></div>
@@ -184,7 +184,7 @@ function basvurularCiz() {
           <th class="px-4 py-2 font-medium">Başvuru</th><th class="px-4 py-2 font-medium">Karar</th><th class="px-4 py-2 font-medium">Aşama</th>
           <th class="px-4 py-2 font-medium">Durum</th><th class="px-4 py-2 font-medium">Taslak</th><th class="px-4 py-2 font-medium">Neden / dikkat</th></tr></thead>
         <tbody>${satirlar.map((x) => `
-          <tr data-bsv="${esc(x.basvuru_id)}" class="border-b border-slate-100 hover:bg-blue-50/50 cursor-pointer">
+          <tr data-bsv="${esc(x.basvuru_id)}" class="border-b border-slate-100 hover:bg-red-50/40 cursor-pointer">
             <td class="px-4 py-2 font-mono text-xs whitespace-nowrap">${esc(x.basvuru_id)}</td>
             <td class="px-4 py-2">${rozet(KARAR_ADI[x.karar] || x.karar || "Veri sorunu", x.karar || "dikkat")}</td>
             <td class="px-4 py-2">${esc(x.asama)}</td>
@@ -225,7 +225,7 @@ function taslakAlani(d) {
   if (!t)
     return `<div class="bg-white rounded-xl border border-slate-200 p-6 text-center">
       <p class="text-sm text-slate-600">Ön kontrolden geçti. Taslak, yalnız soldaki "modele verildi" işaretli kayıtlarla üretilir.</p>
-      <button id="uret" class="mt-4 bg-gok text-white text-sm font-medium px-5 py-2.5 rounded-lg hover:bg-blue-700 disabled:opacity-60" ${S.mesgul ? "disabled" : ""}>
+      <button id="uret" class="mt-4 bg-gok text-white text-sm font-medium px-5 py-2.5 rounded-lg hover:bg-thykoyu disabled:opacity-60" ${S.mesgul ? "disabled" : ""}>
         ${S.mesgul ? "Muse taslak yazıyor…" : "Yapay zekâ taslağı üret"}</button></div>`;
   const gecersiz = t.durum.kod === "gecersiz";
   const kontrol = t.kontrol.length
@@ -240,7 +240,7 @@ function taslakAlani(d) {
       ${t.durum.kod === "onay_dustu" ? kutu("sari", "Onay düştü", "Onaydan sonra metin değişti; güncel metni yeniden onaylayın.") : ""}
       <label class="block text-xs font-medium text-slate-500">Konu
         <input id="konu" class="mt-1 w-full rounded-lg ring-1 ring-slate-300 px-3 py-2 text-sm" value="${esc(t.konu)}" ${gecersiz ? "disabled" : ""}></label>
-      <label class="block text-xs font-medium text-slate-500">E-posta metni <span id="kelime" class="font-normal">(${t.kelime} kelime; hedef 80–120)</span>
+      <label class="block text-xs font-medium text-slate-500">E-posta metni <span id="kelime" class="font-normal">(${t.kelime} kelime; en fazla 120)</span>
         <textarea id="metin" rows="10" class="mt-1 w-full rounded-lg ring-1 ring-slate-300 px-3 py-2 text-sm leading-relaxed" ${gecersiz ? "disabled" : ""}>${esc(t.metin)}</textarea></label>
       ${kontrol}
       ${t.emin_olunmayan.length ? kutu("gri", "Modelin emin olmadığı noktalar", `<ul class="list-disc ml-5">${t.emin_olunmayan.map((x) => `<li>${esc(x)}</li>`).join("")}</ul>`) : ""}
@@ -405,7 +405,7 @@ $("icerik").addEventListener("input", (e) => {
 });
 
 $("detay").addEventListener("input", (e) => {
-  if (e.target.id === "metin") $("kelime").textContent = `(${e.target.value.trim().split(/\s+/).filter(Boolean).length} kelime; hedef 80–120)`;
+  if (e.target.id === "metin") $("kelime").textContent = `(${e.target.value.trim().split(/\s+/).filter(Boolean).length} kelime; en fazla 120)`;
 });
 $("detay").addEventListener("click", (e) => {
   const b = S.detay && encodeURIComponent(S.detay.basvuru_id);
