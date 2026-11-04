@@ -32,7 +32,8 @@ uv run --directory backend python ../scripts/muse_baglanti_testi.py
 - A–G: kalınan bölümün doğru sayısı ve barajı (toplam yok); gözlem kısa özet; kontenjanda yetersizlik, öneri ve vaat yok;
   öneri yalnız somut gözlemle; 80–120 kelime, kurumsal-empatik; soru/itiraz Başvuru ID ile, sonuç ya da tarih sözü yok.
 - Son kontrol otomatik düzeltmez, "İK dikkat" işaretler. Gönder düğmesi yok; yalnız İK onayı.
-- Girdi hash'i değişirse taslak ve onay, metin değişirse onay geçersiz.
+- Mülakat retleri (video, İK ve birim, sözlü İngilizce) daha yumuşak ve az ayrıntılı: beceri alanı düzeyinde tek cümle, 80–100 kelime.
+- Taslak anahtarı = girdi kayıtları + o başvurunun sistem istemi (`core/taslak.py`); biri değişirse taslak ve onay, metin değişirse onay geçersiz.
 - Sayılar ve başvuru ID'leri koda yazılmaz; 40, 60 ya da 1.000 satırlık dosyada da çalışmalı.
 
 ## Kod düzeni

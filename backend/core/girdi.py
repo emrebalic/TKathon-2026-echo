@@ -47,7 +47,9 @@ def model_girdisi(motor, d) -> dict | None:
     notlar = motor._satirlar("ik_notlari", b)
     ik_not = notlar.sort_values("kayit_tarihi").iloc[-1].to_dict() if not notlar.empty else None
     kontenjan = bool(ik_not and ik_not.get("gerekce_kodu") == "KONTENJAN_KISITI")
-    tur = "kontenjan" if kontenjan else {"SINAV": "sinav", "INGILIZCE": "ingilizce_gorusme"}.get(asama, "oznel_degerlendirme")
+    # Mülakat aşamaları (video, İK ve birim) daha yumuşak ve az ayrıntılı bir blokla yazılır; grup çalışması ayrı kalır.
+    tur = "kontenjan" if kontenjan else {"SINAV": "sinav", "INGILIZCE": "ingilizce_gorusme",
+                                         "VIDEO": "mulakat", "IK_TEKNIK": "mulakat"}.get(asama, "oznel_degerlendirme")
 
     kayitlar = []
     if tur == "sinav":

@@ -12,6 +12,13 @@ Takımın kararları (`teslim/Cozum_Ozeti.docx`, 02. bölüm). İstem ve son kon
 | **F** Gönderim zamanı | Kontroller tamamlanıp güncel metin İK onayı alınca göndeririz | Aşama sonunda toplu gönderim, onayı tamamlanmış başvuruları da bekletir | İş Yükü Verileri; Planlama Verileri; PK-06 |
 | **G** İtiraz ve soru | Talep Başvuru ID'ye kaydedilir, alındığı bildirilir; İK kayıtları inceleyip yanıtı onaylayınca sonuçlanır. Yapay zekâ taslak desteği verir; tarih ya da sonuç sözü yok | Otomatik ret ya da doğrulamadan puan/karar değiştirmek hatalı sonuç üretir | BSV-033; SN-033-EN-D1; PK-03, PK-06 |
 
+## Güncelleme: mülakat e-postaları
+
+Video mülakat, İK ve birim mülakatı ve sözlü İngilizce mülakatı retlerinde e-posta **daha yumuşak ve daha az ayrıntılı**:
+neden tek cümlede, beceri alanı düzeyinde anlatılır; görev senaryosu, sorular ve yanıtlar aktarılmaz; öneri en fazla
+bir kısa genel cümle; 80–100 kelime. İngilizce mülakatında puan ve baraj tek kısa cümlede kalır. Sınav (A), grup
+çalışması (B) ve kontenjan (C) e-postaları değişmedi. İstem değişince yalnız ilgili başvuruların taslakları yeniden üretilir.
+
 ## Sunumda hazır olunacak soru
 
 **F ile düzeltmeler:** Veride 5 düzeltmenin hepsi karardan 19–20 saat sonra girilmiş (ör. BSV-033'ün yeniden puanlaması).

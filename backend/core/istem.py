@@ -22,12 +22,21 @@ BLOKLAR = {
     "sinav": """Aşama bloğu (sınav, A): Aday bir sınav bölümünün barajını karşılayamadı. Kalınan her bölüm için \
 doğru sayısını ve geçme barajını açıkça yaz; örnek: "İngilizce bölümünde 15 sorunun 6'sına doğru yanıt verdiniz; \
 geçme barajı 10 doğruydu." Toplam puan verme, geçilen bölümden söz etme, gelişim önerisi verme.""",
-    "ingilizce_gorusme": """Aşama bloğu (İngilizce görüşmesi): Görüşme puanını, en yüksek puanı ve geçme barajını yaz. \
-Değerlendirici gözlemini kısa ve yargısız özetle; ham notu aynen aktarma (B). Bu puan genel dil seviyesi değildir. \
-Gözlem somutsa tek cümlelik, uygulanabilir bir öneri verebilirsin; zorunlu değil (D).""",
-    "oznel_degerlendirme": """Aşama bloğu (video, grup ya da İK/birim değerlendirmesi): Değerlendirici gözlemini ve İK \
-gerekçesini, ilgili beceri tanımına bağlayarak kısa özetle; ham notu aynen aktarma (B). Gözlem somutsa tek cümlelik, \
-uygulanabilir bir gelişim önerisi verebilirsin; zorunlu değil (D).""",
+    "ingilizce_gorusme": """Aşama bloğu (sözlü İngilizce mülakatı; yumuşak ve az ayrıntılı): Sonucu nazik ve yumuşak bir \
+dille bildir; adayın görüşmeye ayırdığı zamanı takdir et. Görüşme puanını ve geçme barajını tek kısa cümlede belirt \
+(biçim: "Görüşme puanınız [puan]/[en yüksek puan] oldu; geçme barajı [baraj] puandı."). Değerlendirici gözlemindeki görev \
+senaryosunu ve yanıt ayrıntılarını aktarma; gerekirse tek bir genel ifadeyle yetin. Bu puan genel dil seviyesi değildir. \
+Gelişim önerisi verme ya da en fazla bir kısa, genel cümleyle sınırla. Teşekkürü yalnız bir kez yap; aynı duyguyu \
+tekrarlama. Metni 80–100 kelimede tut.""",
+    "mulakat": """Aşama bloğu (video mülakat ya da İK ve birim mülakatı; yumuşak ve az ayrıntılı): Sonucu nazik ve yumuşak \
+bir dille bildir; adayın mülakata ayırdığı zamanı ve emeği takdir et. Nedeni tek cümlede, yalnız ilgili beceri alanı \
+düzeyinde anlat; beceri tanımını adaya "siz" diye hitap ederek yeniden ifade et (biçim: "Yaşanmış bir örnekte kendi \
+katkınızı ve attığınız adımları açıkça aktarma beklentisi bu mülakatta karşılanmadı."). Değerlendirici gözlemindeki \
+görev senaryosunu, soruları ve adayın yanıtlarını aktarma; alıntı yapma, ayrıntı sayma. Gelişim önerisi verme ya da en \
+fazla bir kısa, genel cümleyle sınırla. Teşekkürü yalnız bir kez yap; aynı duyguyu tekrarlama. Metni 80–100 kelimede tut.""",
+    "oznel_degerlendirme": """Aşama bloğu (grup çalışması): Değerlendirici gözlemini ve İK gerekçesini, ilgili beceri \
+tanımına bağlayarak kısa özetle; ham notu aynen aktarma (B). Gözlem somutsa tek cümlelik, uygulanabilir bir gelişim \
+önerisi verebilirsin; zorunlu değil (D).""",
     "kontenjan": """Aşama bloğu (kontenjan, C): Adayın değerlendirme beklentilerini karşıladığını ve sonucun başvurduğu \
 birimin bu dönemki kontenjanının kaldırılmasından kaynaklandığını açıkça yaz. Yetersizlik, eksiklik ya da gelişim \
 ihtiyacı ima etme; gelişim önerisi verme; gelecek dönem, öncelik ya da yeniden değerlendirme vaadi verme.""",

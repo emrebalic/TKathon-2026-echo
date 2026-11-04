@@ -7,17 +7,17 @@ import re
 
 KELIME_ALT, KELIME_UST = 80, 120
 
-# Küçük harfe çevrilmiş metinde aranır (bkz. _kucuk).
+# Küçük harfe çevrilmiş metinde, kelime başından aranır (bkz. _kucuk); "gözden geçirin" gibi kelime içi eşleşmeler sayılmaz.
 YASAK = [
-    (r"\b(?:a1|a2|b1|b2|c1|c2)\b|cefr|dil seviye|seviyeniz|seviyesinde", "Dil seviyesi ifadesi"),
-    (r"içine kapanık|kişiliğ|karakteriniz|uyumsuz|özgüven", "Kişilik yorumu"),
-    (r"diğer adaylar|başka adaylar|adaylar arasında|daha güçlü aday|rakip", "Başka adaylarla kıyas"),
-    (r"ileride|gelecek dönem|bir sonraki dönem|yeniden değerlendiril|tekrar değerlendiril|kabul edileceksiniz|"
-     r"işe alınacak|garanti|öncelik tanı", "Vaat ya da gelecek sözü"),
-    (r"tekrar başvur|yeniden başvur", "Kayıtta olmayan bilgi: yeniden başvuru"),
-    (r"en geç|tarihine kadar|gün içinde|hafta içinde", "Tarih ya da süre sözü"),
+    (r"\b(?:a1|a2|b1|b2|c1|c2)\b|\b(?:cefr|dil seviye|seviyeniz|seviyesinde)", "Dil seviyesi ifadesi"),
+    (r"\b(?:içine kapanık|kişiliğ|karakteriniz|uyumsuz|özgüven)", "Kişilik yorumu"),
+    (r"\b(?:diğer adaylar|başka adaylar|adaylar arasında|daha güçlü aday|rakip)", "Başka adaylarla kıyas"),
+    (r"\b(?:ileride|gelecek dönem|bir sonraki dönem|yeniden değerlendiril|tekrar değerlendiril|kabul edileceksiniz|"
+     r"işe alınacak|garanti|öncelik tanı)", "Vaat ya da gelecek sözü"),
+    (r"\b(?:tekrar başvur|yeniden başvur)", "Kayıtta olmayan bilgi: yeniden başvuru"),
+    (r"\b(?:en geç|tarihine kadar|gün içinde|hafta içinde)\b", "Tarih ya da süre sözü"),
 ]
-KONTENJAN_YASAK = (r"eksik|yetersiz|geliştir|iyileştir|güçlendir|öneri", "Kontenjan reddinde yetersizlik ya da öneri ifadesi")
+KONTENJAN_YASAK = (r"\b(?:eksik|yetersiz|geliştir|iyileştir|güçlendir|öneri)", "Kontenjan reddinde yetersizlik ya da öneri ifadesi")
 IC_KOD = re.compile(r"\bKP-\d|T101|GRP-[A-Z]|KURUM_ICI|PAYLASILABILIR|\b(?:AS|SN|DL|IK|KR)-\d{3}")
 SAYI = re.compile(r"\d+(?:[.,]\d+)?")
 

@@ -19,13 +19,13 @@ from pydantic import BaseModel
 
 from core import llm
 from core.depo import Depo, durum, guncel_metin, metin_hash
-from core.girdi import girdi_hash, model_girdisi
+from core.girdi import model_girdisi
 from core.is_yuku import hesapla
 from core.loader import yukle
 from core.rules import IK_INCELEME, KAPSAM_DISI, KARAR_KODLARI, TASLAK_UYGUN, KuralMotoru
 from core.schema import SHEETS
 from core.son_kontrol import kontrol_et
-from core.taslak import taslak_uret
+from core.taslak import taslak_anahtari, taslak_uret
 
 BACKEND = Path(__file__).resolve().parents[1]
 FRONTEND = BACKEND.parent / "frontend"
@@ -109,7 +109,7 @@ def create_app(veri_dizini: Path | None = None, cagir=None, on_uretim: bool | No
         for b, d in degerlendirmeler.items():
             g = model_girdisi(motor, d)
             if g:
-                girdiler[b] = (g, girdi_hash(g))
+                girdiler[b] = (g, taslak_anahtari(g))
         s.update(veri=veri, motor=motor, d=degerlendirmeler, girdiler=girdiler, dosya_adi=ad, zaman=zaman, nesil=s["nesil"] + 1)
         if on_uretim:
             uretimi_baslat()
@@ -140,10 +140,15 @@ def create_app(veri_dizini: Path | None = None, cagir=None, on_uretim: bool | No
             "id": t["id"], "konu": konu, "metin": metin, "ilk_konu": t["ilk_konu"], "ilk_metin": t["ilk_metin"],
             "ik_duzeltti": t["ik_metin"] is not None, "ik_zaman": t["ik_zaman"], "onay_zaman": t["onay_zaman"],
             "kullanilan_idler": json.loads(t["kullanilan_idler"]), "emin_olunmayan": json.loads(t["emin_olunmayan"]),
-            "kontrol": json.loads(t["ik_kontrol"] or t["ilk_kontrol"]), "kelime": len(metin.split()),
+            "kontrol": guncel_kontrol(t), "kelime": len(metin.split()),
             "model": t["model"], "kaynak_turu": t["kaynak"], "olusturma": t["olusturma"],
-            "durum": durum(t, g[1] if g else None, s["zaman"]),
+            "durum": {**durum(t, g[1] if g else None, s["zaman"]), "ik_dikkat": bool(guncel_kontrol(t))},
         }
+
+    def guncel_kontrol(t):
+        """Son kontrol, taslağın dayandığı girdiyle ve güncel kurallarla her okumada yeniden hesaplanır."""
+        konu, metin = guncel_metin(t)
+        return kontrol_et(json.loads(t["girdi_json"]), konu, metin, json.loads(t["kullanilan_idler"]))
 
     def satir(d, sonlar):
         t = sonlar.get(d.basvuru_id)
@@ -275,7 +280,7 @@ def create_app(veri_dizini: Path | None = None, cagir=None, on_uretim: bool | No
             raise HTTPException(404, detail="Onaylanacak taslak yok.")
         if not g or t["girdi_hash"] != g[1]:
             raise HTTPException(409, detail="Veri değişti; bu taslak onaylanamaz. Yeni taslak üretin.")
-        if json.loads(t["ik_kontrol"] or t["ilk_kontrol"]) and not govde.uyarilari_okudum:
+        if guncel_kontrol(t) and not govde.uyarilari_okudum:
             raise HTTPException(409, detail="Son kontrolde uyarılar var; okuduğunuzu işaretleyip yeniden onaylayın.")
         depo.onayla(t["id"], metin_hash(*guncel_metin(t)))
         return detay(b)

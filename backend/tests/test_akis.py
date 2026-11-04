@@ -176,3 +176,18 @@ def test_is_yuku_vaka_rakamlari(istemci):
     assert r["elle"]["dakika"] == 15552 and r["elle"]["saat"] == 259.2 and r["elle"]["is_gunu"] == 43.2
     assert r["oneri"]["saat"] == 55.2 and r["oneri"]["is_gunu"] == 9.2
     assert istemci.get("/api/is-yuku", params={"sorunlulari_elle_yaz": True}).json()["oneri"]["saat"] == 69.5
+
+
+@veri_gerekli
+def test_mulakat_blogu_ve_istem_degisince_taslak_yenilenir(motor, monkeypatch):
+    from core import istem as istem_modulu
+    from core.taslak import taslak_anahtari
+    m, ds = motor
+    tur = {b: model_girdisi(m, ds[b])["gerekce_turu"] for b in ("BSV-001", "BSV-002", "BSV-051", "BSV-065", "BSV-008")}
+    assert tur == {"BSV-001": "sinav", "BSV-002": "mulakat", "BSV-051": "oznel_degerlendirme",
+                   "BSV-065": "ingilizce_gorusme", "BSV-008": "kontenjan"}
+    video, grup = model_girdisi(m, ds["BSV-002"]), model_girdisi(m, ds["BSV-051"])
+    once = taslak_anahtari(video), taslak_anahtari(grup)
+    monkeypatch.setitem(istem_modulu.BLOKLAR, "mulakat", istem_modulu.BLOKLAR["mulakat"] + " Ek kural.")
+    assert taslak_anahtari(video) != once[0]   # yalnız istemi değişen başvurunun taslağı düşer
+    assert taslak_anahtari(grup) == once[1]

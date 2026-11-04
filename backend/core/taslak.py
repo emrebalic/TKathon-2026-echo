@@ -1,7 +1,16 @@
 """Bir başvuru için taslak üretir: girdi → istem → model → son kontrol."""
 from core import llm
+from core.girdi import girdi_hash
 from core.istem import CIKTI_SEMASI, istem
 from core.son_kontrol import kontrol_et
+
+
+def taslak_anahtari(girdi: dict) -> str:
+    """Taslağın geçerlilik hash'i: girdi kayıtları ve o başvuruya giden sistem istemi.
+
+    Kayıtlar ya da o başvurunun istem bloğu değişirse eski taslak ve onayı geçersiz olur ve yeniden üretilir.
+    """
+    return girdi_hash({"girdi": girdi, "istem": istem(girdi)[0]})
 
 
 def taslak_uret(girdi: dict, cagir=None) -> dict:
