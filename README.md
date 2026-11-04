@@ -39,7 +39,7 @@ Testler ve betikler `data/raw/02_Veriler.xlsx` dosyasını bekler (git'e girmez;
 7. **Dışa aktarım:** İK listesi ve İK düzeltmeleri Excel olarak. Her model çağrısı `backend/logs/` altında JSON.
 7. **İş yükü:** elle süreç (259,2 sa / 43,2 gün) ve önerilen süreç; dakikalar değiştirilerek duyarlılık.
 
-**İkinci yapay zekâ yolu:** Yanıtlar dışarıda üretildiyse Başvurular sekmesindeki "Hazır yanıt dosyası yükle" ile Excel ya da JSON yüklenir
+**İkinci yapay zekâ yolu:** Yanıtlar dışarıda üretildiyse `POST /api/yanitlar` ucuna Excel ya da JSON yüklenir (arayüzde düğmesi yok)
 (sütunlar: `basvuru_id`, `email_konu`, `email_metni`, `kullanilan_kayit_idleri`). Başvuru ID'si eşleşmeyen yanıt onaya açılmaz.
 
 ## Üç test

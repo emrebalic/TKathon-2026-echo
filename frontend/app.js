@@ -1,5 +1,5 @@
 // Arayüz yalnız gösterir; bütün kurallar backend'de. Veri metinleri esc() ile kaçırılır.
-const S = { ozet: null, liste: [], grup: "tum", asama: "", ara: "", sekme: "basvurular", detay: null, mesgul: false, dil: "tr" };
+const S = { ozet: null, liste: [], grup: "tum", asama: "", sekme: "basvurular", detay: null, mesgul: false, dil: "tr" };
 const $ = (id) => document.getElementById(id);
 const esc = (v) => String(v ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
 const sayi = (v, k = 1) => (typeof v === "number" ? v.toLocaleString("tr-TR", { maximumFractionDigits: k }) : "—");
@@ -131,7 +131,7 @@ function uretimiIzle() {
       S.ozet = await api("/api/ozet");
       S.liste = await api("/api/basvurular");
       ozetCiz();
-      if (S.sekme === "basvurular" && document.activeElement?.id !== "ara") basvurularCiz();
+      if (S.sekme === "basvurular") basvurularCiz();
       if (S.detay && !S.detay.taslak && S.detay.taslak_uretilebilir && !$("cekmece").classList.contains("hidden")) await detayAc(S.detay.basvuru_id);
     } catch (e) { /* bir sonraki turda yeniden denenir */ }
     uretimiIzle();
@@ -160,11 +160,10 @@ function ciz() {
 // ---------- başvurular ----------
 function basvurularCiz() {
   const asamalar = [...new Set(S.liste.map((x) => x.asama).filter(Boolean))];
-  const ara = S.ara.trim().toLowerCase();
   const gruplar = { tum: () => true, olumsuz: (x) => x.karar === "OLUMSUZ", hazir: (x) => x.olumsuz_alt === "hazir",
     onaylandi: (x) => (x.taslak_durumu || {}).kod === "onaylandi", islenmedi: (x) => x.olumsuz_alt === "islenmedi",
     ik: (x) => x.durum === "İK incelemesi", kapsam_disi: (x) => x.durum === "Kapsam dışı" };
-  const satirlar = S.liste.filter((x) => gruplar[S.grup](x) && (!S.asama || x.asama === S.asama) && (!ara || x.basvuru_id.toLowerCase().includes(ara)));
+  const satirlar = S.liste.filter((x) => gruplar[S.grup](x) && (!S.asama || x.asama === S.asama));
   const cip = (k, ad) => `<button data-grup="${k}" class="px-3 py-1 rounded-full text-sm ring-1 ring-inset ${
     S.grup === k ? "bg-murekkep text-white ring-murekkep" : "bg-white text-slate-600 ring-slate-300 hover:bg-slate-50"}">${ad}</button>`;
   $("icerik").innerHTML = `
@@ -174,9 +173,6 @@ function basvurularCiz() {
       <select id="asama" class="ml-auto text-sm rounded-lg border-slate-300 bg-white px-2 py-1 ring-1 ring-slate-300">
         <option value="">Bütün aşamalar</option>${asamalar.map((a) => `<option ${a === S.asama ? "selected" : ""}>${esc(a)}</option>`).join("")}
       </select>
-      <input id="ara" value="${esc(S.ara)}" placeholder="BSV-… ara" class="text-sm rounded-lg px-3 py-1 ring-1 ring-slate-300 w-32">
-      <label class="cursor-pointer text-sm text-gok hover:underline">Hazır yanıt dosyası yükle
-        <input id="yanit-dosya" type="file" accept=".xlsx,.json" class="hidden"></label>
     </div>
     <div class="bg-white rounded-xl border border-slate-200 overflow-x-auto">
       <table class="w-full text-sm">
@@ -417,22 +413,6 @@ $("icerik").addEventListener("change", async (e) => {
     P[e.target.dataset.p] = e.target.type === "checkbox" ? e.target.checked : Number(e.target.value);
     isYukuCiz();
   }
-  if (e.target.id === "yanit-dosya" && e.target.files[0]) {
-    const fd = new FormData(); fd.append("dosya", e.target.files[0]);
-    try {
-      const r = await api("/api/yanitlar", { method: "POST", body: fd });
-      bildir(`${r.kabul.length} yanıt eşleşti${r.red.length ? `, ${r.red.length} yanıt eşleşmedi ve onaya açılmadı` : ""}.`, "bilgi");
-      await yenile();
-    } catch (err) { bildir(err.message); }
-  }
-});
-$("icerik").addEventListener("input", (e) => {
-  if (e.target.id !== "ara") return;
-  S.ara = e.target.value;
-  basvurularCiz();
-  const ara = $("ara");
-  ara.focus();
-  ara.setSelectionRange(ara.value.length, ara.value.length);
 });
 
 $("detay").addEventListener("input", (e) => {
