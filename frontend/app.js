@@ -234,6 +234,7 @@ function taslakAlani(d) {
   return `
     <div class="bg-white rounded-xl border border-slate-200 p-4 space-y-3">
       <div class="flex flex-wrap items-center gap-2">${taslakRozetleri(t.durum)}
+        ${t.ik_duzeltti ? rozet(`İK düzeltmesi kaydedildi · ${new Date(t.ik_zaman).toLocaleTimeString("tr-TR", { hour: "2-digit", minute: "2-digit" })}`, "onaylandi") : ""}
         <span class="text-xs text-slate-400 ml-auto">${esc(t.kaynak_turu === "dosya" ? "yanıt dosyasından" : t.model)} · ${esc(t.olusturma.replace("T", " "))}</span></div>
       ${gecersiz ? kutu("kirmizi", "Veri değişti: bu taslak ve onayı geçersiz", "Kayıtlar taslak üretildikten sonra değişti. Yeni taslak üretin.") : ""}
       ${t.durum.kod === "onay_dustu" ? kutu("sari", "Onay düştü", "Onaydan sonra metin değişti; güncel metni yeniden onaylayın.") : ""}
@@ -290,11 +291,13 @@ function detayCiz() {
     </div>`;
 }
 
-async function detayEylem(fn) {
+async function detayEylem(fn, basari) {
+  // Formdaki değerler fn çağrılmadan önce okunmalı: detayCiz() kutuları kayıtlı metinle yeniden çizer.
   try {
     S.mesgul = true; detayCiz();
     S.detay = await fn();
     await yenile();
+    if (basari) bildir(basari, "bilgi");
   } catch (e) { bildir(e.message); }
   finally { S.mesgul = false; detayCiz(); }
 }
@@ -408,13 +411,17 @@ $("detay").addEventListener("click", (e) => {
   const b = S.detay && encodeURIComponent(S.detay.basvuru_id);
   if (e.target.id === "kapat") $("cekmece").classList.add("hidden");
   if (e.target.id === "uret") detayEylem(() => api(`/api/basvurular/${b}/taslak`, { method: "POST" }));
-  if (e.target.id === "kaydet") detayEylem(() => api(`/api/basvurular/${b}/duzeltme`, {
-    method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ konu: $("konu").value, metin: $("metin").value }) }));
+  if (e.target.id === "kaydet") {
+    const govde = JSON.stringify({ konu: $("konu").value, metin: $("metin").value });
+    detayEylem(() => api(`/api/basvurular/${b}/duzeltme`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: govde }),
+      "Düzeltme kaydedildi; ekranda düzenlenmiş metin görünüyor.");
+  }
   if (e.target.id === "onayla") {
     const okudum = $("okudum") ? $("okudum").checked : false;
     const degisti = $("metin").value.trim() !== S.detay.taslak.metin || $("konu").value.trim() !== S.detay.taslak.konu;
     if (degisti) { bildir("Metni değiştirdiniz; önce düzeltmeyi kaydedin, sonra onaylayın."); return; }
-    detayEylem(() => api(`/api/basvurular/${b}/onay`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ uyarilari_okudum: okudum }) }));
+    detayEylem(() => api(`/api/basvurular/${b}/onay`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ uyarilari_okudum: okudum }) }),
+      "Güncel metin İK tarafından onaylandı.");
   }
 });
 
