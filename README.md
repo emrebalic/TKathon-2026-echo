@@ -22,7 +22,20 @@ streamlit run app/main.py
 pytest
 ```
 
-Arayüz `http://localhost:8501` adresinde açılır. Dosya yüklenmezse `data/raw/02_Veriler.xlsx` kullanılır.
+Arayüz `http://localhost:8501` adresinde açılır. ATS Excel dosyasını soldan yükleyin; veri değiştiğinde
+dosyayı yeniden yükleyin. Panel yeni dosyayı aynı oturumdaki bir önceki yüklemeyle karşılaştırır ve kaydı
+değişen, yeni gelen ve dosyadan çıkan başvuruları üstte listeler. Değişen başvuruların eski taslağı ve İK
+onayı geçersiz sayılır.
+
+## Yapay zekâ: Meta Muse
+
+`core/llm.py`, Meta Model API'nin OpenAI uyumlu uç noktasını (`https://api.meta.ai/v1`, model `muse-spark-1.3`)
+çağırır ve her çağrının girdisini ve ham yanıtını `store/ai_kayitlari.jsonl` dosyasına yazar.
+Anahtarı `.env` içine `MODEL_API_KEY` olarak koyup bağlantıyı deneyin:
+
+```bash
+python tools/muse_baglanti_testi.py
+```
 
 ## Klasörler
 
@@ -31,8 +44,11 @@ Arayüz `http://localhost:8501` adresinde açılır. Dosya yüklenmezse `data/ra
 | `core/schema.py` | Excel başlıklarını Alan Sözlüğü'ndeki teknik adlara eşler (’ ve ' farkını yok sayar) |
 | `core/loader.py` | Dosyayı okur, zorunlu sayfa ve sütunları doğrular |
 | `core/rules.py` | Kural motoru: başvuruları Taslağa uygun / İK incelemesi / Kapsam dışı olarak ayırır, dayanak kayıtlarını ve parmak izini çıkarır |
+| `core/degisiklik.py` | İki yükleme arasında değişen başvuruları bulur |
+| `core/llm.py` | Muse Spark istemcisi ve yapay zekâ girdi/yanıt kaydı |
+| `tools/muse_baglanti_testi.py` | API anahtarı ve JSON şeması desteği denemesi |
 | `app/main.py` | Streamlit İK paneli |
-| `tests/` | Sayım, İK listesi, farklı kayıt sayısı ve veri değişikliği testleri |
+| `tests/` | Sayım, İK listesi, farklı kayıt sayısı, veri değişikliği ve yeniden yükleme testleri |
 | `docs/ANALIZ.md` | Veri analizi bulguları ve tuzak listesi |
 | `data/test/` | 40 / 60 satırlık ve değiştirilmiş test dosyaları |
 
@@ -43,7 +59,7 @@ Herkes kendi dalında çalışır, küçük parçalar halinde `main`'e birleşti
 | Dal | Sorumluluk | Sıradaki iş |
 |---|---|---|
 | `backend` | Veri ve kural motoru | Taslak / düzeltme / onay deposu (`store/`), parmak izi ile onay geçersizleştirme |
-| `ai` | Yapay zekâ | `core/llm.py`: yalnız paylaşılabilir alanlardan girdi, JSON çıktı, çıktı doğrulayıcı (iç kod, CEFR, vaat, kontenjanda yetersizlik ifadesi) |
+| `ai` | Yapay zekâ | Taslak istemi (yalnız paylaşılabilir alanlar, JSON çıktı) ve çıktı doğrulayıcı (iç kod, CEFR, vaat, kontenjanda yetersizlik ifadesi) |
 | `ui` | Arayüz | Taslak düzenleme ve onay akışı, durum sayıları (hazırlanan / bekleyen / işlenmeyen) |
 | `ideathon` | İçerik | A–G iletişim kararları, İK kontrol süresi ölçümü, iş yükü Excel'i, 1 sayfalık .docx |
 | `sunum` | Test ve sunum | Test dosyaları, 3 testin ekran görüntüleri, pptx, 90 sn video, ek görevler |

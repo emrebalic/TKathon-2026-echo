@@ -4,6 +4,7 @@
 """
 import io
 import sys
+from datetime import datetime
 from pathlib import Path
 
 import pandas as pd
@@ -12,11 +13,11 @@ import streamlit as st
 KOK = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(KOK))
 
+from core.degisiklik import degisen_basvurular  # noqa: E402
 from core.loader import yukle  # noqa: E402
 from core.rules import IK_INCELEME, KAPSAM_DISI, TASLAK_UYGUN, KuralMotoru, ozet  # noqa: E402
 from core.schema import SHEETS  # noqa: E402
 
-ORNEK_DOSYA = KOK / "data" / "raw" / "02_Veriler.xlsx"
 ASAMA_ADLARI = {"SINAV": "Sınav", "VIDEO": "Video", "GRUP": "Grup", "INGILIZCE": "İngilizce görüşme",
                 "ENVANTER": "Envanter", "IK_TEKNIK": "İK ve birim", "TEKLIF": "Teklif", "BELGE": "Belge"}
 
@@ -40,16 +41,17 @@ def kayit_ozeti(tablo, r):
     return r.get("gozlem_metni") or ""
 
 
+def kisalt(liste, en_fazla=8):
+    return ", ".join(liste) if len(liste) <= en_fazla else ", ".join(liste[:en_fazla]) + f" ve {len(liste) - en_fazla} başvuru daha"
+
+
 st.sidebar.header("Veri dosyası")
 yuklenen = st.sidebar.file_uploader("ATS Excel dosyası", type=["xlsx"])
-if yuklenen is not None:
-    icerik, dosya_adi = yuklenen.getvalue(), yuklenen.name
-elif ORNEK_DOSYA.exists():
-    icerik, dosya_adi = ORNEK_DOSYA.read_bytes(), ORNEK_DOSYA.name
-    st.sidebar.caption("Dosya yüklenmedi; örnek veri kullanılıyor.")
-else:
-    st.info("Başlamak için soldan bir Excel dosyası yükleyin.")
+if yuklenen is None:
+    st.title("Junior Wings geri bildirim paneli")
+    st.info("Başlamak için soldan ATS Excel dosyasını yükleyin. Veri değiştiğinde dosyayı yeniden yükleyin.")
     st.stop()
+icerik, dosya_adi = yuklenen.getvalue(), yuklenen.name
 
 veri = oku(icerik)
 if not veri.gecerli:
@@ -64,8 +66,21 @@ motor = KuralMotoru(veri)
 degerlendirmeler = motor.degerlendir()
 sayilar = ozet(degerlendirmeler)
 
+# Aynı oturumdaki bir önceki yüklemeyle karşılaştır: kaydı değişen başvurunun parmak izi değişir.
+izler = {d.basvuru_id: d.parmak_izi for d in degerlendirmeler}
+onceki = st.session_state.get("izler")
+if onceki is not None and onceki != izler:
+    st.session_state["son_degisim"] = (datetime.now(), st.session_state.get("dosya_adi"), degisen_basvurular(onceki, izler))
+st.session_state["izler"], st.session_state["dosya_adi"] = izler, dosya_adi
+
 st.title("Junior Wings geri bildirim paneli")
 st.caption(f"Dosya: {dosya_adi}")
+if "son_degisim" in st.session_state:
+    zaman, eski_ad, fark = st.session_state["son_degisim"]
+    parcalar = [f"{ad}: {kisalt(liste)}" for ad, liste in
+                (("değişen", fark["degisen"]), ("yeni", fark["yeni"]), ("dosyada artık yok", fark["silinen"])) if liste]
+    st.info(f"{zaman:%H:%M:%S} yüklemesi, bir önceki dosyayla ({eski_ad}) karşılaştırıldı · " + " · ".join(parcalar)
+            + ". Değişen başvuruların eski taslağı ve İK onayı geçersizdir.")
 
 c = st.columns(4)
 c[0].metric("Toplam başvuru", sayilar["toplam"])
