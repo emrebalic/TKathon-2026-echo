@@ -58,7 +58,7 @@ class Depo:
             db.executescript(SEMA)
 
     def _baglan(self):
-        db = sqlite3.connect(self.yol)
+        db = sqlite3.connect(self.yol, timeout=30)
         db.row_factory = sqlite3.Row
         return db
 

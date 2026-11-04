@@ -51,6 +51,7 @@ async function yenile() {
   S.ozet = await api("/api/ozet");
   if (S.ozet.yuklu) S.liste = await api("/api/basvurular");
   ciz();
+  uretimiIzle();
 }
 
 async function dosyaYukle(dosya) {
@@ -58,7 +59,7 @@ async function dosyaYukle(dosya) {
   fd.append("dosya", dosya);
   try {
     S.mesgul = true;
-    $("dosya-bilgi").textContent = "Yükleniyor…";
+    $("yukle-etiket").textContent = "Yükleniyor…";
     await api("/api/yukle", { method: "POST", body: fd });
     bildir(`${dosya.name} yüklendi; sayılar ve listeler güncellendi.`, "bilgi");
     await yenile();
@@ -72,36 +73,82 @@ async function dosyaYukle(dosya) {
 }
 
 // ---------- özet ve sekmeler ----------
-function kart(baslik, deger, not = "", vurgu = "") {
-  return `<div class="bg-white rounded-xl border border-slate-200 px-4 py-3 ${vurgu}">
-    <p class="text-xs text-slate-500">${esc(baslik)}</p>
-    <p class="text-2xl font-semibold tabular-nums mt-1">${sayi(deger, 0)}</p>
-    ${not ? `<p class="text-xs text-slate-400 mt-0.5">${esc(not)}</p>` : ""}</div>`;
-}
+const DONEN = `<svg class="h-4 w-4 animate-spin text-gok" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="3" fill="none" opacity=".2"/><path d="M21 12a9 9 0 0 0-9-9" stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round"/></svg>`;
+const TIK = `<svg class="h-4 w-4 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 5 5 9-10"/></svg>`;
 
 function ozetCiz() {
-  const o = S.ozet;
+  const o = S.ozet, u = o.uretim || {};
+  const parcalar = [
+    { grup: "onaylandi", ad: "İK onaylı", n: o.onaylandi, dolgu: "bg-emerald-500", not: "güncel metin onaylandı" },
+    { grup: "hazir", ad: "Taslağı hazır", n: Math.max(0, o.taslak_hazir - o.onaylandi), dolgu: "bg-indigo-500", not: "tıklayınca açılır, İK okuyacak" },
+    { grup: "islenmedi", ad: u.calisiyor ? "Hazırlanıyor" : "Taslağı yok", n: o.islenmedi,
+      dolgu: `serit-hazirlaniyor ${u.calisiyor ? "akiyor" : ""}`, not: u.calisiyor ? "Muse yazıyor" : "henüz üretilmedi" },
+    { grup: "ik", ad: "İK incelemesi", n: o.ik_incelemesi, dolgu: "bg-amber-400", not: "e-posta üretilmez" },
+  ];
+  const payda = Math.max(1, o.olumsuz);
+  const yan = (ad, n, grup) => `<button data-grup="${grup}" class="text-left rounded-lg bg-slate-50 ring-1 ring-slate-200 px-3 py-1.5 hover:bg-slate-100">
+      <span class="block text-[11px] text-slate-500">${ad}</span><span class="text-base font-semibold tabular-nums">${sayi(n, 0)}</span></button>`;
+  const ilerleme = u.toplam ? Math.round(((u.tamam + u.hata) / u.toplam) * 100) : 100;
+  const durum = u.calisiyor
+    ? `${DONEN}<span class="font-medium">Muse taslakları hazırlıyor</span>
+       <span class="tabular-nums text-slate-500">${u.tamam + u.hata} / ${u.toplam}</span>
+       <span class="w-40 h-1.5 rounded-full bg-slate-100 overflow-hidden"><span class="block h-full bg-gok transition-all" style="width:${ilerleme}%"></span></span>`
+    : o.taslak_hazir
+      ? `${TIK}<span class="font-medium">Taslaklar hazır</span><span class="text-slate-500">${sayi(o.taslak_hazir, 0)} taslak${o.ik_dikkat ? ` · ${sayi(o.ik_dikkat, 0)} tanesinde İK dikkat` : ""}</span>`
+      : `<span class="text-slate-500">Henüz taslak yok.</span>`;
+  const eksik = !u.calisiyor && o.islenmedi
+    ? `<button id="eksikleri-hazirla" class="text-sm px-3 py-1 rounded-lg bg-gok text-white hover:bg-blue-700">${u.hata ? `${u.hata} taslak üretilemedi · yeniden dene` : "Eksik taslakları hazırla"}</button>` : "";
   $("ozet").innerHTML = `
-    <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
-      ${kart("Toplam başvuru", o.toplam)}${kart("Olumsuz", o.olumsuz)}${kart("Kabul", o.kabul, "olumsuz e-posta yok")}
-      ${kart("Değerlendirmesi süren", o.devam, "olumsuz e-posta yok")}${kart("Veri sorunu", o.veri_sorunu, "karar kodu eksik/tanımsız")}
-    </div>
-    <div>
-      <p class="text-xs font-medium text-slate-500 mb-2">Olumsuz başvuruların durumu</p>
-      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        ${kart("Taslağı hazırlanan", o.taslak_hazir, "geçerli yapay zekâ taslağı var", "border-l-4 border-l-indigo-500")}
-        ${kart("İK incelemesine ayrılan", o.ik_incelemesi, "e-posta üretilmez", "border-l-4 border-l-amber-500")}
-        ${kart("Henüz işlenmeyen", o.islenmedi, "taslağa uygun, taslak yok", "border-l-4 border-l-slate-400")}
-        ${kart("İK onaylı", o.onaylandi, "güncel metin onaylı", "border-l-4 border-l-emerald-500")}
+    <div class="flex flex-wrap items-end gap-x-6 gap-y-4">
+      <div><p class="text-xs text-slate-500">Toplam başvuru</p><p class="text-4xl font-semibold tabular-nums leading-none mt-1">${sayi(o.toplam, 0)}</p></div>
+      <svg class="h-6 w-6 text-slate-300 mb-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>
+      <button data-grup="olumsuz" class="text-left"><p class="text-xs text-slate-500">Olumsuz karar · geri bildirim kapsamı</p>
+        <p class="text-4xl font-semibold tabular-nums leading-none mt-1 text-murekkep">${sayi(o.olumsuz, 0)}</p></button>
+      <div class="sm:ml-auto flex flex-wrap gap-2">
+        ${yan("Kabul", o.kabul, "kapsam_disi")}${yan("Değerlendirmesi süren", o.devam, "kapsam_disi")}${yan("Veri sorunu", o.veri_sorunu, "ik")}
       </div>
+    </div>
+    <div class="mt-5 flex h-3 gap-0.5 rounded-full overflow-hidden bg-slate-100" role="img" aria-label="Olumsuz başvuruların durumu">
+      ${parcalar.filter((p) => p.n > 0).map((p) => `<button data-grup="${p.grup}" aria-label="${esc(p.ad)}: ${p.n}" class="${p.dolgu} h-full hover:opacity-80" style="width:${(p.n / payda) * 100}%"></button>`).join("")}
+    </div>
+    <div class="mt-3 grid grid-cols-2 lg:grid-cols-4 gap-2">
+      ${parcalar.map((p) => `<button data-grup="${p.grup}" class="flex items-start gap-2 rounded-lg px-2 py-1.5 text-left hover:bg-slate-50 ${S.grup === p.grup ? "bg-slate-50 ring-1 ring-slate-200" : ""}">
+        <span class="mt-1.5 h-2.5 w-2.5 rounded-sm ${p.dolgu} shrink-0"></span>
+        <span><span class="block text-sm"><b class="tabular-nums">${sayi(p.n, 0)}</b> ${esc(p.ad)}</span><span class="block text-xs text-slate-400">${esc(p.not)}</span></span></button>`).join("")}
+    </div>
+    <div class="mt-4 pt-4 border-t border-slate-100 flex flex-wrap items-center gap-3 text-sm">
+      ${durum}${eksik}
+      <span class="sm:ml-auto text-xs text-slate-400">Gönderim düğmesi yok; her e-posta İK onayından geçer.</span>
     </div>`;
+}
+
+let izleyici;
+function uretimiIzle() {
+  clearTimeout(izleyici);
+  if (!(S.ozet && S.ozet.uretim && S.ozet.uretim.calisiyor)) return;
+  izleyici = setTimeout(async () => {
+    try {
+      S.ozet = await api("/api/ozet");
+      S.liste = await api("/api/basvurular");
+      ozetCiz();
+      if (S.sekme === "basvurular" && document.activeElement?.id !== "ara") basvurularCiz();
+      if (S.detay && !S.detay.taslak && S.detay.taslak_uretilebilir && !$("cekmece").classList.contains("hidden")) await detayAc(S.detay.basvuru_id);
+    } catch (e) { /* bir sonraki turda yeniden denenir */ }
+    uretimiIzle();
+  }, 2000);
 }
 
 function ciz() {
   const yuklu = S.ozet && S.ozet.yuklu;
   $("bos").classList.toggle("hidden", !!yuklu);
   ["ozet", "sekmeler"].forEach((id) => $(id).classList.toggle("hidden", !yuklu));
-  $("dosya-bilgi").textContent = yuklu ? `${S.ozet.dosya_adi} · ${new Date(S.ozet.yukleme_zamani).toLocaleTimeString("tr-TR")}` : "";
+  $("dosya-cip").classList.toggle("hidden", !yuklu);
+  $("dosya-cip").classList.toggle("flex", !!yuklu);
+  $("yukle-etiket").textContent = yuklu ? "Yeni dosya yükle" : "ATS Excel dosyası yükle";
+  if (yuklu) {
+    $("dosya-adi").textContent = S.ozet.dosya_adi;
+    $("dosya-meta").textContent = `${S.ozet.toplam} kayıt · ${new Date(S.ozet.yukleme_zamani).toLocaleTimeString("tr-TR", { hour: "2-digit", minute: "2-digit" })}`;
+  }
   if (!yuklu) { $("icerik").innerHTML = ""; return; }
   ozetCiz();
   document.querySelectorAll(".sekme").forEach((b) => b.setAttribute("aria-selected", String(b.dataset.sekme === S.sekme)));
@@ -114,14 +161,16 @@ function ciz() {
 function basvurularCiz() {
   const asamalar = [...new Set(S.liste.map((x) => x.asama).filter(Boolean))];
   const ara = S.ara.trim().toLowerCase();
-  const gruplar = { tum: () => true, olumsuz: (x) => x.karar === "OLUMSUZ", taslak: (x) => x.durum === "Taslağa uygun",
+  const gruplar = { tum: () => true, olumsuz: (x) => x.karar === "OLUMSUZ", hazir: (x) => x.olumsuz_alt === "hazir",
+    onaylandi: (x) => (x.taslak_durumu || {}).kod === "onaylandi", islenmedi: (x) => x.olumsuz_alt === "islenmedi",
     ik: (x) => x.durum === "İK incelemesi", kapsam_disi: (x) => x.durum === "Kapsam dışı" };
   const satirlar = S.liste.filter((x) => gruplar[S.grup](x) && (!S.asama || x.asama === S.asama) && (!ara || x.basvuru_id.toLowerCase().includes(ara)));
   const cip = (k, ad) => `<button data-grup="${k}" class="px-3 py-1 rounded-full text-sm ring-1 ring-inset ${
     S.grup === k ? "bg-murekkep text-white ring-murekkep" : "bg-white text-slate-600 ring-slate-300 hover:bg-slate-50"}">${ad}</button>`;
   $("icerik").innerHTML = `
     <div class="flex flex-wrap items-center gap-2 mb-3">
-      ${cip("tum", "Tümü")}${cip("olumsuz", "Olumsuz")}${cip("taslak", "Taslağa uygun")}${cip("ik", "İK incelemesi")}${cip("kapsam_disi", "Kapsam dışı")}
+      ${cip("tum", "Tümü")}${cip("olumsuz", "Olumsuz")}${cip("hazir", "Taslağı hazır")}${cip("onaylandi", "İK onaylı")}
+      ${S.ozet.islenmedi ? cip("islenmedi", "Taslağı yok") : ""}${cip("ik", "İK incelemesi")}${cip("kapsam_disi", "Kapsam dışı")}
       <select id="asama" class="ml-auto text-sm rounded-lg border-slate-300 bg-white px-2 py-1 ring-1 ring-slate-300">
         <option value="">Bütün aşamalar</option>${asamalar.map((a) => `<option ${a === S.asama ? "selected" : ""}>${esc(a)}</option>`).join("")}
       </select>
@@ -170,6 +219,9 @@ function taslakAlani(d) {
   if (!d.taslak_uretilebilir)
     return kutu("kirmizi", "E-posta üretilmez: başvuru İK incelemesine ayrıldı", `<ul class="list-disc ml-5">${d.bulgular.map((b) => `<li>${esc(b.ad)}: ${esc(b.aciklama)}</li>`).join("")}</ul>`);
   const t = d.taslak;
+  if (!t && S.ozet.uretim && S.ozet.uretim.calisiyor && !S.mesgul)
+    return `<div class="bg-white rounded-xl border border-slate-200 p-6 flex items-center justify-center gap-3 text-sm text-slate-600">
+      ${DONEN}<span>Muse bu taslağı hazırlıyor; hazır olunca burada açılacak.</span></div>`;
   if (!t)
     return `<div class="bg-white rounded-xl border border-slate-200 p-6 text-center">
       <p class="text-sm text-slate-600">Ön kontrolden geçti. Taslak, yalnız soldaki "modele verildi" işaretli kayıtlarla üretilir.</p>
@@ -305,6 +357,18 @@ async function isYukuCiz() {
 $("dosya").addEventListener("change", (e) => { if (e.target.files[0]) dosyaYukle(e.target.files[0]); e.target.value = ""; });
 document.querySelectorAll(".sekme").forEach((b) => b.addEventListener("click", () => { S.sekme = b.dataset.sekme; ciz(); }));
 $("perde").addEventListener("click", () => $("cekmece").classList.add("hidden"));
+$("ozet").addEventListener("click", async (e) => {
+  if (e.target.closest("#eksikleri-hazirla")) {
+    try { await api("/api/uretim", { method: "POST" }); await yenile(); } catch (err) { bildir(err.message); }
+    return;
+  }
+  const g = e.target.closest("[data-grup]");
+  if (!g) return;
+  S.grup = g.dataset.grup;
+  S.sekme = "basvurular";
+  ciz();
+  $("sekmeler").scrollIntoView({ behavior: "smooth", block: "start" });
+});
 document.addEventListener("keydown", (e) => { if (e.key === "Escape") $("cekmece").classList.add("hidden"); });
 
 $("icerik").addEventListener("click", (e) => {

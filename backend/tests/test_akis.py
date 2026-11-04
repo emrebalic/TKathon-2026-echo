@@ -75,7 +75,41 @@ def _sahte_model(sistem, kullanici, sema, amac="", basvuru_id=""):
 @pytest.fixture()
 def istemci(tmp_path):
     from app.main import create_app
-    return TestClient(create_app(tmp_path, cagir=_sahte_model))
+    return TestClient(create_app(tmp_path, cagir=_sahte_model, on_uretim=False))
+
+
+def _uretimi_bekle(istemci, sure=20.0):
+    import time
+    bitis = time.time() + sure
+    while time.time() < bitis:
+        u = istemci.get("/api/uretim").json()
+        if not u["calisiyor"]:
+            return u
+        time.sleep(0.1)
+    raise AssertionError("Ön üretim zamanında bitmedi")
+
+
+@veri_gerekli
+def test_on_uretim_hepsini_hazirlar_degiseni_yeniler(tmp_path):
+    from alt_kume_olustur import degistir
+    from app.main import create_app
+    istemci = TestClient(create_app(tmp_path / "db", cagir=_sahte_model, on_uretim=True))
+    _yukle(istemci, VERI)
+    u = _uretimi_bekle(istemci)
+    assert (u["toplam"], u["tamam"], u["hata"]) == (57, 57, 0)
+    oz = istemci.get("/api/ozet").json()
+    assert (oz["taslak_hazir"], oz["islenmedi"], oz["ik_incelemesi"]) == (57, 0, 23)
+    istemci.post("/api/basvurular/BSV-001/onay", json={})
+
+    _yukle(istemci, VERI)  # aynı dosya: yeniden üretilecek taslak yok
+    assert _uretimi_bekle(istemci)["toplam"] == 0
+
+    degisen = tmp_path / "degisen.xlsx"
+    degistir(VERI, degisen, "Aşama Kayıtları", "AS-002-02", "Değerlendiricinin gözlemi / süreç notu", "Değişmiş gözlem metni.")
+    _yukle(istemci, degisen)
+    assert _uretimi_bekle(istemci)["toplam"] == 1
+    assert istemci.get("/api/basvurular/BSV-002").json()["taslak"]["durum"]["kod"] == "onay_bekliyor"
+    assert istemci.get("/api/basvurular/BSV-001").json()["taslak"]["durum"]["kod"] == "onaylandi"
 
 
 def _yukle(istemci, yol):

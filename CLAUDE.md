@@ -8,7 +8,7 @@ veri tuzakları `docs/TUZAKLAR.md`. Son teslim 16.45, sunum 17.00.
 
 ```bash
 uv sync --directory backend
-uv run --directory backend uvicorn app.main:app --reload     # http://localhost:8000
+uv run --directory backend uvicorn app.main:create_app --factory --reload     # http://localhost:8000
 uv run --directory backend pytest
 uv run --directory backend python ../scripts/alt_kume_olustur.py
 uv run --directory backend python ../scripts/muse_baglanti_testi.py
@@ -18,7 +18,8 @@ uv run --directory backend python ../scripts/muse_baglanti_testi.py
 
 - `backend/core/`: schema, loader (Excel → teknik adlar), rules (ön kontrol), girdi (modele giden kayıtlar),
   istem (A–G), llm (Muse, `muse-spark-1.3`), son_kontrol, taslak, depo (SQLite + hash), is_yuku
-- `backend/app/main.py`: FastAPI uçları; `frontend/` klasörünü `/` altında sunar
+- `backend/app/main.py`: `create_app()` fabrikası (içe aktarmak uygulama başlatmaz); FastAPI uçları; yüklemeden sonra
+  taslakları arka planda üretir (`/api/uretim`, `MVP_ON_URETIM=0` ile kapanır); `frontend/` klasörünü `/` altında sunar
 - `frontend/`: tek sayfa (Tailwind CDN + sade JS); iş kuralı içermez, yalnız API'yi gösterir
 - `backend/logs/`: her model çağrısının girdisi ve ham yanıtı (teslim şartı); `backend/data/`: SQLite ve son yükleme
 

@@ -1,10 +1,13 @@
 """FastAPI uygulaması: bütün iş kuralları burada ve core/ altında; arayüz yalnız gösterir.
 
-Çalıştırma (depo kökünden): uv run --directory backend uvicorn app.main:app --reload
+Çalıştırma (depo kökünden): uv run --directory backend uvicorn app.main:create_app --factory --reload
+İçe aktarmak uygulama oluşturmaz; böylece testler gerçek modeli ve kayıtlı veriyi tetiklemez.
 """
 import io
 import json
 import os
+import threading
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 from pathlib import Path
 
@@ -49,13 +52,52 @@ def kayit_ozeti(tablo, r):
     return r.get("gozlem_metni") or ""
 
 
-def create_app(veri_dizini: Path | None = None, cagir=None) -> FastAPI:
-    """`cagir` testte sahte modelle değiştirilir."""
+ESZAMANLI_CAGRI = 5
+
+
+def create_app(veri_dizini: Path | None = None, cagir=None, on_uretim: bool | None = None) -> FastAPI:
+    """`cagir` testte sahte modelle değiştirilir. `on_uretim`: yüklemeden sonra taslaklar arka planda hazırlansın mı."""
     veri_dizini = Path(veri_dizini or os.getenv("MVP_VERI_DIZINI", BACKEND / "data"))
     veri_dizini.mkdir(parents=True, exist_ok=True)
+    if on_uretim is None:
+        on_uretim = os.getenv("MVP_ON_URETIM", "1") != "0"
     son_dosya, son_meta = veri_dizini / "son_yukleme.xlsx", veri_dizini / "son_yukleme.json"
     depo = Depo(veri_dizini / "mvp.db")
-    s = {"veri": None}
+    s = {"veri": None, "nesil": 0, "uretim": {"calisiyor": False, "toplam": 0, "tamam": 0, "hata": 0, "hatalar": []}}
+
+    def uretimi_baslat():
+        """Geçerli taslağı olmayan bütün uygun başvurular için taslağı arka planda üretir.
+
+        Her çalıştırmanın kendi sayaç sözlüğü vardır; yeni dosya yüklenince eski çalıştırmanın sonuçları kaydedilmez.
+        """
+        nesil, girdiler = s["nesil"], dict(s["girdiler"])
+        sonlar = depo.sonlar()
+        bekleyen = [b for b, (_, h) in girdiler.items() if b not in sonlar or sonlar[b]["girdi_hash"] != h]
+        calisma = {"calisiyor": bool(bekleyen), "toplam": len(bekleyen), "tamam": 0, "hata": 0, "hatalar": []}
+        s["uretim"] = calisma
+        if not bekleyen:
+            return
+        kilit = threading.Lock()
+
+        def tek(b):
+            g, h = girdiler[b]
+            try:
+                sonuc = taslak_uret(g, cagir)
+                if s["nesil"] == nesil:
+                    depo.ekle(b, g, h, sonuc)
+                with kilit:
+                    calisma["tamam"] += 1
+            except Exception as exc:  # bir başvurunun hatası diğerlerini durdurmaz
+                with kilit:
+                    calisma["hata"] += 1
+                    calisma["hatalar"].append({"basvuru_id": b, "mesaj": str(exc)[:200]})
+
+        def calis():
+            with ThreadPoolExecutor(max_workers=ESZAMANLI_CAGRI) as havuz:
+                list(havuz.map(tek, bekleyen))
+            calisma["calisiyor"] = False
+
+        threading.Thread(target=calis, daemon=True).start()
 
     def isle(icerik: bytes, ad: str, zaman: str):
         veri = yukle(io.BytesIO(icerik))
@@ -68,7 +110,9 @@ def create_app(veri_dizini: Path | None = None, cagir=None) -> FastAPI:
             g = model_girdisi(motor, d)
             if g:
                 girdiler[b] = (g, girdi_hash(g))
-        s.update(veri=veri, motor=motor, d=degerlendirmeler, girdiler=girdiler, dosya_adi=ad, zaman=zaman)
+        s.update(veri=veri, motor=motor, d=degerlendirmeler, girdiler=girdiler, dosya_adi=ad, zaman=zaman, nesil=s["nesil"] + 1)
+        if on_uretim:
+            uretimi_baslat()
 
     if son_dosya.exists() and son_meta.exists():
         meta = json.loads(son_meta.read_text(encoding="utf-8"))
@@ -160,7 +204,22 @@ def create_app(veri_dizini: Path | None = None, cagir=None) -> FastAPI:
             "ik_incelemesi": say(lambda x: x["karar"] == "OLUMSUZ" and x["durum"] == IK_INCELEME),
             "islenmedi": say(lambda x: x["olumsuz_alt"] == "islenmedi"),
             "onaylandi": say(lambda x: (x["taslak_durumu"] or {}).get("kod") == "onaylandi"),
+            "ik_dikkat": say(lambda x: x["olumsuz_alt"] == "hazir" and (x["taslak_durumu"] or {}).get("ik_dikkat")),
+            "uretim": {k: v for k, v in s["uretim"].items() if k != "hatalar"},
         }
+
+    @app.get("/api/uretim")
+    def uretim_durumu():
+        return s["uretim"]
+
+    @app.post("/api/uretim")
+    def uretimi_yeniden_baslat():
+        """Geçerli taslağı olmayanları (ör. hata alanları) yeniden hazırlar."""
+        gerekli()
+        if s["uretim"]["calisiyor"]:
+            raise HTTPException(409, detail="Taslaklar zaten hazırlanıyor.")
+        uretimi_baslat()
+        return s["uretim"]
 
     @app.get("/api/basvurular")
     def liste(grup: str = "tum", asama: str = ""):
@@ -282,6 +341,3 @@ def create_app(veri_dizini: Path | None = None, cagir=None) -> FastAPI:
     if FRONTEND.exists():
         app.mount("/", StaticFiles(directory=FRONTEND, html=True), name="arayuz")
     return app
-
-
-app = create_app()

@@ -17,7 +17,7 @@ uv sync --directory backend
 Depo kökünde `.env` dosyası oluşturun (`.env.example`'ı kopyalayın) ve `MODEL_API_KEY` satırına Meta Model API anahtarını yazın.
 
 ```bash
-uv run --directory backend uvicorn app.main:app --reload
+uv run --directory backend uvicorn app.main:create_app --factory --reload
 ```
 
 Tarayıcıda **http://localhost:8000** adresini açın ve "ATS Excel dosyası yükle" ile `02_Veriler.xlsx`'i yükleyin.
@@ -32,6 +32,7 @@ Testler ve betikler `data/raw/02_Veriler.xlsx` dosyasını bekler (git'e girmez;
 1. **Yükleme ve sayım:** toplam, OLUMSUZ / KABUL / DEVAM_EDIYOR, veri sorunu; olumsuzlarda taslağı hazırlanan / İK incelemesine ayrılan / henüz işlenmeyen.
 2. **Ön kontrol** (kod): dayanak bulunamadı ya da başka başvuruya ait, dayanak düzeltilmiş, sınav sayıları tutarsız ya da geçilen bölüm, görüşmede gözlem yok, İK notu / gerekçe / teyit eksik, KURUM_ICI dayanak, kişilik yargısı, kontenjanın idari kaydı yok, çelişkili gözlem → e-posta üretilmez, İK'ya.
 3. **Taslak** (Muse): yalnız o başvurunun paylaşılabilir kayıtları; aşamaya göre istem bloğu; JSON çıktı (`email_konu`, `email_metni`, `kullanilan_kayit_idleri`, `emin_olunmayan_noktalar`).
+   Dosya yüklenince geçerli taslağı olmayan bütün uygun başvuruların taslakları arka planda (aynı anda 5 çağrı) hazırlanır; başvuruya tıklayınca taslak hazır açılır. Aynı dosya yeniden yüklenirse yalnız verisi değişen başvurular yeniden üretilir. Kapatmak için `.env`'e `MVP_ON_URETIM=0`.
 4. **Son kontrol** (kod): kayıt ID'leri, kayıtta olmayan sayı, yasaklı ifadeler, iç kodlar, 80–120 kelime, Başvuru ID. Sorun varsa "İK dikkat"; otomatik düzeltme yok.
 5. **İK:** düzenle, kaydet, onayla. İlk taslak, İK düzeltmesi ve onay ayrı saklanır. Girdi değişirse taslak ve onay, metin değişirse onay düşer.
 6. **Dışa aktarım:** İK listesi ve İK düzeltmeleri Excel olarak. Her model çağrısı `backend/logs/` altında JSON.

@@ -4,7 +4,7 @@
     {
       "name": "mvp",
       "runtimeExecutable": "uv",
-      "runtimeArgs": ["run", "--directory", "backend", "uvicorn", "app.main:app", "--port", "8000"],
+      "runtimeArgs": ["run", "--directory", "backend", "uvicorn", "app.main:create_app", "--factory", "--port", "8000"],
       "port": 8000
     }
   ]
