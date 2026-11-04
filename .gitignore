@@ -1,0 +1,21 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Gizli bilgiler: API anahtarı teslim paketine konur, depoya değil
+.env
+.streamlit/secrets.toml
+
+# Yarışma materyalleri (organizasyonun dosyaları, mentor listesi)
+data/raw/
+materials/
+
+# Uygulamanın kaydettiği taslak ve onaylar
+store/
+
+# Excel ve işletim sistemi kalıntıları
+~$*.xlsx
+.DS_Store
+Thumbs.db
