@@ -188,7 +188,7 @@ def create_app(veri_dizini: Path | None = None, cagir=None, on_uretim: bool | No
         return {**satir(d, sonlar), "bulgular": [{"kod": x.kod, "ad": x.ad, "aciklama": x.aciklama, "kayitlar": x.kayitlar} for x in d.bulgular],
                 "kayitlar": kayitlar, "model_girdisi": g[0] if g else None, "taslak": taslak_bilgisi(b, depo.son(b))}
 
-    app = FastAPI(title="Geri bildirim MVP'si")
+    app = FastAPI(title="Junior Wings geri bildirim MVP'si")
 
     @app.post("/api/yukle")
     def dosya_yukle(dosya: UploadFile = File(...)):

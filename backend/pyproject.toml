@@ -1,7 +1,7 @@
 [project]
 name = "junior-wings-mvp"
 version = "0.1.0"
-description = "Yapay zekâ destekli, İK onaylı aday geri bildirim MVP'si"
+description = "TKATHON 2026 · Junior Wings yapay zekâ destekli geri bildirim MVP'si"
 requires-python = ">=3.11"
 dependencies = [
     "fastapi>=0.115",

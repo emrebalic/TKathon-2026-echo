@@ -1,6 +1,6 @@
-# Aday geri bildirim MVP'si
+# Junior Wings geri bildirim MVP'si
 
-Olumsuz sonuçlanan program başvuruları için ATS kayıtlarına dayanan, Meta Muse ile yazılan ve İK onayından
+Olumsuz sonuçlanan Junior Wings başvuruları için ATS kayıtlarına dayanan, Meta Muse ile yazılan ve İK onayından
 geçen geri bildirim e-postası taslakları. Kararı değiştirmez; dayanağı eksik, çelişkili, düzeltilmiş ya da paylaşımı
 onaylanmamış başvuruları e-posta üretmeden İK'ya ayırır.
 
@@ -21,7 +21,7 @@ uv run --directory backend uvicorn app.main:create_app --factory --reload
 ```
 
 Tarayıcıda **http://localhost:8000** adresini açın ve "ATS Excel dosyası yükle" ile `data/test/Veriler_60_basvuru.xlsx` dosyasını yükleyin
-(aynı biçimdeki herhangi bir ATS dosyası da olur). Program adı `.env` içindeki `PROGRAM_ADI` ile değiştirilir.
+(aynı biçimdeki herhangi bir ATS dosyası da olur).
 
 - Testler: `uv run --directory backend pytest`
 - Muse bağlantısı: `uv run --directory backend python ../scripts/muse_baglanti_testi.py`

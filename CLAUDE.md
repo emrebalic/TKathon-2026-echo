@@ -1,8 +1,7 @@
-# Aday geri bildirim MVP'si
+# Junior Wings geri bildirim MVP'si
 
-Olumsuz program başvuruları için ATS kayıtlarına dayanan, İK onayından geçen geri bildirim taslakları.
-Takım kararları `docs/ILETISIM_KARARLARI.md`, veri tuzakları `docs/TUZAKLAR.md`. Test verisi `data/test/`;
-program adı `.env` içindeki `PROGRAM_ADI` (`core/__init__.py`).
+Olumsuz Junior Wings başvuruları için ATS kayıtlarına dayanan, İK onayından geçen geri bildirim taslakları.
+Takım kararları `docs/ILETISIM_KARARLARI.md`, veri tuzakları `docs/TUZAKLAR.md`. Test verisi `data/test/`.
 
 ## Komutlar (depo kökünden)
 

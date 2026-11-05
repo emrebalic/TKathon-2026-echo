@@ -50,7 +50,7 @@ def test_ik_incelemesindekilere_girdi_yok(motor):
 def test_son_kontrol_hatalari_yakalar(motor):
     m, ds = motor
     g = model_girdisi(m, ds["BSV-001"])
-    dolgu = " ".join(["Değerlendirme sürecine gösterdiğiniz ilgi için teşekkür ederiz."] * 9)
+    dolgu = " ".join(["Junior Wings değerlendirme sürecine gösterdiğiniz ilgi için teşekkür ederiz."] * 9)
     iyi = (f"{dolgu} İngilizce bölümünde 15 sorunun 6'sına doğru yanıt verdiniz; geçme barajı 10 doğruydu. "
            f"Sorularınızı BSV-001 Başvuru ID'si ile iletebilirsiniz.")
     assert kontrol_et(g, "BSV-001 başvurunuz hakkında", iyi, ["SN-001-EN"]) == []
@@ -65,14 +65,14 @@ def test_son_kontrol_hatalari_yakalar(motor):
 def _sahte_model(sistem, kullanici, sema, amac="", basvuru_id=""):
     if amac == "ingilizce":
         b = basvuru_id
-        govde = " ".join(["Thank you for your interest in our assessment process."] * 9)
+        govde = " ".join(["Thank you for your interest in the Junior Wings assessment process."] * 9)
         veri = {"email_subject": f"About your application {b}",
                 "email_body": govde + f" You can send your questions with application ID {b} by replying to this email.",
                 "anlam_farki_notlari": []}
         return Yanit("sahte", "sahte-model", json.dumps(veri), veri, 0.0)
     girdi = json.loads(kullanici.split("\n", 1)[1])
     b = girdi["basvuru_id"]
-    metin = " ".join(["Değerlendirme sürecine gösterdiğiniz ilgi için teşekkür ederiz."] * 9)
+    metin = " ".join(["Junior Wings değerlendirme sürecine gösterdiğiniz ilgi için teşekkür ederiz."] * 9)
     metin += f" Sorularınızı {b} Başvuru ID'si ile bu e-postayı yanıtlayarak iletebilirsiniz."
     veri = {"email_konu": f"{b} başvurunuz hakkında", "email_metni": metin,
             "kullanilan_kayit_idleri": [k["kayit_id"] for k in girdi["kayitlar"]], "emin_olunmayan_noktalar": []}

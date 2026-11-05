@@ -5,10 +5,10 @@
 import json
 import re
 
-from core import PROGRAM_ADI, llm
+from core import llm
 from core.son_kontrol import SAYI
 
-SISTEM = """You translate a Turkish rejection-feedback email for the {program} into English.
+SISTEM = """You translate a Turkish rejection-feedback email for the Junior Wings programme into English.
 The email will be reviewed by HR before sending. Keep the context exactly:
 1. Translate faithfully. Do not add, remove or soften any fact, reason, number or the decision itself.
 2. Keep every number, score and threshold exactly as written, and keep the application ID {basvuru_id} unchanged.
@@ -68,7 +68,7 @@ def kontrol(girdi: dict, tr_konu: str, tr_metin: str, en_konu: str, en_metin: st
 
 def cevir(girdi: dict, tr_konu: str, tr_metin: str, cagir=None) -> dict:
     cagir = cagir or llm.cagir
-    sistem = SISTEM.format(basvuru_id=girdi["basvuru_id"], program=PROGRAM_ADI)
+    sistem = SISTEM.format(basvuru_id=girdi["basvuru_id"])
     kullanici = ("Turkish email subject:\n" + tr_konu + "\n\nTurkish email body:\n" + tr_metin
                  + "\n\nApplication records (context only):\n" + json.dumps(girdi, ensure_ascii=False, indent=2))
     yanit = cagir(sistem, kullanici, SEMA, amac="ingilizce", basvuru_id=girdi["basvuru_id"])
