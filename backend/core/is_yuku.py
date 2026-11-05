@@ -1,4 +1,4 @@
-"""İK iş yükü: vaka formülüyle elle süreç ve parametreli önerilen süreç (1.200 başvuruluk dönem)."""
+"""İK iş yükü: dosyadaki sürelerle elle süreç ve parametreli önerilen süreç (1.200 başvuruluk dönem)."""
 
 
 def hesapla(is_yuku, planlama, okuma_dk=0.5, kontrol_dk=1.0, duzeltme_orani=0.10, duzeltme_dk=2.0,

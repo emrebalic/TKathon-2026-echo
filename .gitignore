@@ -4,15 +4,15 @@ __pycache__/
 *.pyc
 .pytest_cache/
 
-# Gizli bilgiler: API anahtarı teslim paketine konur, depoya değil
+# Gizli bilgiler: API anahtarı depoya girmez
 .env
 .streamlit/secrets.toml
 
-# Yarışma materyalleri (organizasyonun dosyaları, mentor listesi)
+# Ham kaynak veri ve dış materyaller (yalnız yerelde)
 data/raw/
 materials/
 
-# Uygulamanın kaydettiği taslak, onay, son yükleme ve model kayıtları (teslim paketine zip ile girer)
+# Uygulamanın kaydettiği taslak, onay, son yükleme ve model kayıtları (yalnız yerelde)
 store/
 backend/data/
 backend/logs/

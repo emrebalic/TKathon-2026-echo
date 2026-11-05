@@ -1,8 +1,7 @@
-# TKATHON 2026 · Junior Wings geri bildirim MVP'si
+# Junior Wings geri bildirim MVP'si
 
 Olumsuz Junior Wings başvuruları için ATS kayıtlarına dayanan, İK onayından geçen geri bildirim taslakları.
-Vaka `docs/VAKA.md`, görev tanımı `docs/MVP_GOREV.md`, takım kararları `docs/ILETISIM_KARARLARI.md`,
-veri tuzakları `docs/TUZAKLAR.md`. Son teslim 16.45, sunum 17.00.
+Takım kararları `docs/ILETISIM_KARARLARI.md`, veri tuzakları `docs/TUZAKLAR.md`. Test verisi `data/test/`.
 
 ## Komutlar (depo kökünden)
 
@@ -21,7 +20,7 @@ uv run --directory backend python ../scripts/muse_baglanti_testi.py
 - `backend/app/main.py`: `create_app()` fabrikası (içe aktarmak uygulama başlatmaz); FastAPI uçları; yüklemeden sonra
   taslakları arka planda üretir (`/api/uretim`, `MVP_ON_URETIM=0` ile kapanır); `frontend/` klasörünü `/` altında sunar
 - `frontend/`: tek sayfa (Tailwind CDN + sade JS); iş kuralı içermez, yalnız API'yi gösterir
-- `backend/logs/`: her model çağrısının girdisi ve ham yanıtı (teslim şartı); `backend/data/`: SQLite ve son yükleme
+- `backend/logs/`: her model çağrısının girdisi ve ham yanıtı (denetim kaydı); `backend/data/`: SQLite ve son yükleme
 
 ## Değişmez kurallar
 
@@ -40,4 +39,4 @@ uv run --directory backend python ../scripts/muse_baglanti_testi.py
 
 - Tanımlayıcılar ve arayüz metinleri Türkçe; yorumlar seyrek.
 - Kural değişikliğinde `backend/tests/` güncellenir; `main`'e yalnız testleri geçen kod girer.
-- `.env`, `data/raw/`, `materials/`, `backend/data/`, `backend/logs/` git'e girmez.
+- `.env`, `data/raw/`, `materials/`, `backend/data/`, `backend/logs/` git'e girmez; testler `data/test/` ile çalışır.

@@ -1,6 +1,6 @@
 # Veri tuzakları
 
-`02_Veriler.xlsx` üzerinde kural taraması ve keşifsel analizle bulunan tuzaklar. Etkilenen sayıları bu dosyadan
+120 başvuruluk ham dosya (depoda yok; `data/test/` bunun alt kümesi) üzerinde kural taraması ve keşifsel analizle bulunan tuzaklar. Etkilenen sayıları bu dosyadan
 hesaplandı; yeni bir dosyada değişebilir. Grafikli rapor: https://claude.ai/artifact/A8Nvwk6ZSrNjmFQzZKDYi6
 
 Seviye: **Kritik** bir kırmızı çizgiye doğrudan yol açar; **Yüksek** puan kaybettirir; **Dikkat** sessiz hataya yol açabilir.

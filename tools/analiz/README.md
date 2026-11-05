@@ -5,8 +5,8 @@
 
 | Betik | Ne yapar | Çalıştırma |
 |---|---|---|
-| `kural_taramasi.py` | Her olumsuz başvuruyu tarar ve işaretleri listeler; `detail` modunda bir başvurunun bütün kayıt izini döker | `python tools/analiz/kural_taramasi.py data/raw/02_Veriler.xlsx flags`<br>`python tools/analiz/kural_taramasi.py data/raw/02_Veriler.xlsx detail BSV-003,BSV-033` |
-| `ince_tuzaklar.py` | Tarih sıralaması, baraj sınırı, iki İngilizce barajı, gözlem kalıpları, kurum içi notlar | `python tools/analiz/ince_tuzaklar.py data/raw/02_Veriler.xlsx` |
-| `eda_veri_setleri.py` | EDA raporunun JSON veri setlerini ve tuzak kataloğunu üretir | `python tools/analiz/eda_veri_setleri.py data/raw/02_Veriler.xlsx cikti/` |
+| `kural_taramasi.py` | Her olumsuz başvuruyu tarar ve işaretleri listeler; `detail` modunda bir başvurunun bütün kayıt izini döker | `python tools/analiz/kural_taramasi.py data/test/Veriler_60_basvuru.xlsx flags`<br>`python tools/analiz/kural_taramasi.py data/test/Veriler_60_basvuru.xlsx detail BSV-003,BSV-033` |
+| `ince_tuzaklar.py` | Tarih sıralaması, baraj sınırı, iki İngilizce barajı, gözlem kalıpları, kurum içi notlar | `python tools/analiz/ince_tuzaklar.py data/test/Veriler_60_basvuru.xlsx` |
+| `eda_veri_setleri.py` | EDA raporunun JSON veri setlerini ve tuzak kataloğunu üretir | `python tools/analiz/eda_veri_setleri.py data/test/Veriler_60_basvuru.xlsx cikti/` |
 
 Betikler orijinal Excel başlıklarını doğrudan kullanır; sütun adları değişmiş bir dosyada `core/loader.py` tercih edilmeli.

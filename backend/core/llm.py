@@ -1,7 +1,7 @@
 """Meta Model API (Muse Spark) istemcisi.
 
 Meta'nın OpenAI uyumlu Chat Completions uç noktasını kullanır. Her çağrının girdisi ve ham
-yanıtı backend/logs/{Başvuru ID}_{zaman}.json dosyasına yazılır (teslimde istenen "yapay zekâya
+yanıtı backend/logs/{Başvuru ID}_{zaman}.json dosyasına yazılır ("yapay zekâya
 verilen girdiler ve ham yanıtlar").
 
 Ayarlar depo kökündeki .env dosyasından okunur: MODEL_API_KEY (zorunlu), MODEL_ID, MODEL_API_BASE_URL.
