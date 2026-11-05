@@ -1,7 +1,8 @@
 """Test dosyaları üretir: aynı yapıda daha az başvuru ve bir kaydı değiştirilmiş kopya.
 
-Çalıştırma (depo kökünden): uv run --directory backend python ../scripts/alt_kume_olustur.py
-Çıktılar data/test/ altına yazılır.
+Çalıştırma (depo kökünden): uv run --directory backend python ../scripts/alt_kume_olustur.py [kaynak.xlsx]
+Kaynak verilmezse data/test/Veriler_60_basvuru.xlsx kullanılır. Çıktılar data/test/ altına yazılır;
+kaynağın kendisinin üzerine yazılmaz.
 """
 import sys
 from pathlib import Path
@@ -9,8 +10,8 @@ from pathlib import Path
 import openpyxl
 
 KOK = Path(__file__).resolve().parents[1]
-KAYNAK = KOK / "data" / "raw" / "02_Veriler.xlsx"
 HEDEF = KOK / "data" / "test"
+VARSAYILAN_KAYNAK = HEDEF / "Veriler_60_basvuru.xlsx"
 
 
 def _basvuru_sutunu(ws):
@@ -52,8 +53,11 @@ def degistir(kaynak: Path, hedef: Path, sayfa: str, kayit_id: str, sutun: str, d
 
 if __name__ == "__main__":
     sys.stdout.reconfigure(encoding="utf-8")
+    KAYNAK = Path(sys.argv[1]).resolve() if len(sys.argv) > 1 else VARSAYILAN_KAYNAK
     for adet in (40, 60):
         yol = HEDEF / f"Veriler_{adet}_basvuru.xlsx"
+        if yol.resolve() == KAYNAK:
+            continue
         print(f"{yol.name}: {alt_kume(KAYNAK, yol, adet)} başvuru")
     yol = HEDEF / "Veriler_degisen_BSV-002.xlsx"
     degistir(KAYNAK, yol, "Aşama Kayıtları", "AS-002-02", "Değerlendiricinin gözlemi / süreç notu",

@@ -53,13 +53,13 @@ elle yazılır" seçeneği bu durumu gösterir. İK kontrolü için 1 dk bir var
 Eşik: (7.200 − 3.244) ÷ 1.040 ≈ **3,8 dk**. Taslak başına İK süresi bunu aşarsa önerilen süreç de 20 iş gününe sığmaz.
 Daha ayrıntılı e-posta, kontrol süresini uzatır; bu yüzden ayrıntı kararı (A, B, E) bu eşikle birlikte savunulmalı.
 
-## Ölçüm protokolü (madde 04 bunu istiyor)
+## Ölçüm protokolü
 
 1. İki ekip üyesi İK rolüne geçer. Her biri 10 taslak kontrol eder: 4 sınav, 2 video, 2 grup, 1 İngilizce, 1 kontenjan.
 2. Kronometre detay ekranının açılmasıyla başlar, onay ya da düzeltmenin kaydıyla biter.
 3. Her taslak için süre (dk), düzeltme yapıldı mı ve ne düzeltildiği not edilir.
-4. Ortalama ve dağılım hesaplanır. Ölçülen değer "ölçüm", vakadan alınan süreler "veri", kalanlar "varsayım"
+4. Ortalama ve dağılım hesaplanır. Ölçülen değer "ölçüm", dosyadan alınan süreler "veri", kalanlar "varsayım"
    olarak ayrı sütunlarda gösterilir.
-5. Ölçülen ortalama yukarıdaki 2,5 dk'nın yerine konur; tablo ve sunumun 11. slaytı güncellenir.
+5. Ölçülen ortalama yukarıdaki 2,5 dk'nın yerine konur; tablo güncellenir.
 
 Zaman tasarrufu tek başına aday memnuniyetinin arttığını göstermez; memnuniyet verisi yok.

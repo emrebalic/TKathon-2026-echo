@@ -1,6 +1,6 @@
 # Veri analizi bulguları
 
-Kaynak: `02_Veriler.xlsx` (120 kurgusal başvuru). Grafikli rapor: https://claude.ai/artifact/A8Nvwk6ZSrNjmFQzZKDYi6
+Kaynak: 120 kurgusal başvuruluk ham dosya (depoda yok; `data/test/` dosyaları bunun alt kümesidir). Grafikli rapor: https://claude.ai/artifact/A8Nvwk6ZSrNjmFQzZKDYi6
 
 ## Sayılar
 

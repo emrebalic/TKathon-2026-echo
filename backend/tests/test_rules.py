@@ -6,13 +6,10 @@ from core.loader import Veri, yukle
 from core.rules import IK_INCELEME, TASLAK_UYGUN, KuralMotoru, ozet
 from core.schema import column_lookup, normalize
 
-VERI_DOSYASI = Path(__file__).resolve().parents[2] / "data" / "raw" / "02_Veriler.xlsx"
-IK_LISTESI = {f"BSV-{i:03d}" for i in
-              [3, 5, 6, 7, 33, 40, 44, 45, 47, 48, 49, 53, 57, 59, 61, 62, 64, 77, 79, 81, 82, 83, 84]}
-# Görev dosyasında (docs/MVP_GOREV.md) "en az" İK'ya düşmesi beklenenler; fazlası çelişkili gözlem kuralından gelir.
-GOREV_BEKLENEN = {f"BSV-{i:03d}" for i in [5, 6, 7, 33, 40, 44, 45, 47, 48, 57, 59, 61, 62, 64, 77, 79, 81, 83, 84]}
+VERI_DOSYASI = Path(__file__).resolve().parents[2] / "data" / "test" / "Veriler_60_basvuru.xlsx"
+IK_LISTESI = {f"BSV-{i:03d}" for i in [3, 5, 6, 7, 33, 40, 44, 45, 47, 48, 49, 53, 57, 59]}
 
-veri_gerekli = pytest.mark.skipif(not VERI_DOSYASI.exists(), reason="data/raw/02_Veriler.xlsx yok")
+veri_gerekli = pytest.mark.skipif(not VERI_DOSYASI.exists(), reason="data/test/Veriler_60_basvuru.xlsx yok")
 
 
 @pytest.fixture(scope="module")
@@ -30,8 +27,8 @@ def test_tipografik_kesme_isareti_eslesir():
 def test_sayilar(veri):
     assert veri.gecerli, veri.hatalar
     s = ozet(KuralMotoru(veri).degerlendir())
-    assert (s["toplam"], s["olumsuz"], s["kabul"], s["devam"]) == (120, 80, 20, 20)
-    assert (s["taslaga_uygun"], s["ik_incelemesi"]) == (57, 23)
+    assert (s["toplam"], s["olumsuz"], s["kabul"], s["devam"]) == (60, 56, 2, 2)
+    assert (s["taslaga_uygun"], s["ik_incelemesi"]) == (42, 14)
 
 
 @veri_gerekli
@@ -73,13 +70,6 @@ def test_veri_degisince_parmak_izi_degisir(veri):
     assert all(once[b] == sonra[b] for b in once if b != "BSV-001")
 
 
-@veri_gerekli
-def test_gorev_dosyasindaki_beklenen_liste_kapsaniyor(veri):
-    ik = {d.basvuru_id for d in KuralMotoru(veri).degerlendir() if d.durum == IK_INCELEME}
-    assert GOREV_BEKLENEN <= ik
-    assert ik - GOREV_BEKLENEN == {"BSV-003", "BSV-049", "BSV-053", "BSV-082"}
-
-
 def _degisik(veri, key, kaynak_id, alan, deger):
     df = veri[key].copy()
     df.loc[df["kaynak_id"] == kaynak_id, alan] = deger
@@ -89,6 +79,6 @@ def _degisik(veri, key, kaynak_id, alan, deger):
 @veri_gerekli
 def test_yeni_kurallar(veri):
     kodlar = lambda v, b: {x.kod for d in KuralMotoru(v).degerlendir() if d.basvuru_id == b for x in d.bulgular}
-    assert "GOZLEM_YOK" in kodlar(_degisik(veri, "dil", "DL-065", "gozlem_metni", None), "BSV-065")
+    assert "GOZLEM_YOK" in kodlar(_degisik(veri, "dil", "DL-004", "gozlem_metni", None), "BSV-004")
     assert "KONTENJAN_KAYDI_YOK" in kodlar(_degisik(veri, "asama_kayitlari", "AS-008-07", "kaynak_rolu", "IK_UZMANI"), "BSV-008")
     assert "GOZLEM_GEREKCE_CELISKI" in kodlar(veri, "BSV-049")

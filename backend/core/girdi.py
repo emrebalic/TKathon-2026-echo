@@ -7,6 +7,7 @@ import hashlib
 import json
 import re
 
+from core import PROGRAM_ADI
 from core.rules import TASLAK_UYGUN, kimlikler
 
 IC_KOD = re.compile(r"\b(?:KP-\d{4}-\d{2}-\d{2}-\d{2}|T101[-\w]*|GRP-[A-Z0-9]+)\b\s*")
@@ -90,7 +91,7 @@ def model_girdisi(motor, d) -> dict | None:
 
     return {
         "basvuru_id": b,
-        "program": "Junior Wings",
+        "program": PROGRAM_ADI,
         "karar": "olumsuz",
         "karar_asamasi": asama_adlari.get(asama, asama),
         "gerekce_turu": tur,

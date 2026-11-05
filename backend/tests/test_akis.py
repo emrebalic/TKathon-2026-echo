@@ -14,9 +14,9 @@ from core.son_kontrol import kontrol_et
 
 KOK = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(KOK / "scripts"))
-VERI = KOK / "data" / "raw" / "02_Veriler.xlsx"
+VERI = KOK / "data" / "test" / "Veriler_60_basvuru.xlsx"
 XLSX = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-veri_gerekli = pytest.mark.skipif(not VERI.exists(), reason="data/raw/02_Veriler.xlsx yok")
+veri_gerekli = pytest.mark.skipif(not VERI.exists(), reason="data/test/Veriler_60_basvuru.xlsx yok")
 
 
 @pytest.fixture(scope="module")
@@ -65,14 +65,14 @@ def test_son_kontrol_hatalari_yakalar(motor):
 def _sahte_model(sistem, kullanici, sema, amac="", basvuru_id=""):
     if amac == "ingilizce":
         b = basvuru_id
-        govde = " ".join(["Thank you for your interest in the Junior Wings assessment process."] * 9)
+        govde = " ".join(["Thank you for your interest in our assessment process."] * 9)
         veri = {"email_subject": f"About your application {b}",
                 "email_body": govde + f" You can send your questions with application ID {b} by replying to this email.",
                 "anlam_farki_notlari": []}
         return Yanit("sahte", "sahte-model", json.dumps(veri), veri, 0.0)
     girdi = json.loads(kullanici.split("\n", 1)[1])
     b = girdi["basvuru_id"]
-    metin = " ".join(["Junior Wings değerlendirme sürecine gösterdiğiniz ilgi için teşekkür ederiz."] * 9)
+    metin = " ".join(["Değerlendirme sürecine gösterdiğiniz ilgi için teşekkür ederiz."] * 9)
     metin += f" Sorularınızı {b} Başvuru ID'si ile bu e-postayı yanıtlayarak iletebilirsiniz."
     veri = {"email_konu": f"{b} başvurunuz hakkında", "email_metni": metin,
             "kullanilan_kayit_idleri": [k["kayit_id"] for k in girdi["kayitlar"]], "emin_olunmayan_noktalar": []}
@@ -103,9 +103,9 @@ def test_on_uretim_hepsini_hazirlar_degiseni_yeniler(tmp_path):
     istemci = TestClient(create_app(tmp_path / "db", cagir=_sahte_model, on_uretim=True))
     _yukle(istemci, VERI)
     u = _uretimi_bekle(istemci)
-    assert (u["toplam"], u["tamam"], u["hata"]) == (57, 57, 0)
+    assert (u["toplam"], u["tamam"], u["hata"]) == (42, 42, 0)
     oz = istemci.get("/api/ozet").json()
-    assert (oz["taslak_hazir"], oz["islenmedi"], oz["ik_incelemesi"]) == (57, 0, 23)
+    assert (oz["taslak_hazir"], oz["islenmedi"], oz["ik_incelemesi"]) == (42, 0, 14)
     istemci.post("/api/basvurular/BSV-001/onay", json={})
 
     _yukle(istemci, VERI)  # aynı dosya: yeniden üretilecek taslak yok
@@ -126,8 +126,8 @@ def _yukle(istemci, yol):
 @veri_gerekli
 def test_olagan_basvuru_taslak_duzeltme_onay(istemci):
     oz = _yukle(istemci, VERI).json()
-    assert (oz["toplam"], oz["olumsuz"], oz["kabul"], oz["devam"]) == (120, 80, 20, 20)
-    assert (oz["taslak_hazir"], oz["ik_incelemesi"], oz["islenmedi"]) == (0, 23, 57)
+    assert (oz["toplam"], oz["olumsuz"], oz["kabul"], oz["devam"]) == (60, 56, 2, 2)
+    assert (oz["taslak_hazir"], oz["ik_incelemesi"], oz["islenmedi"]) == (0, 14, 42)
 
     d = istemci.post("/api/basvurular/BSV-002/taslak").json()
     assert d["taslak"]["durum"]["kod"] == "onay_bekliyor" and d["taslak"]["kontrol"] == []
@@ -177,7 +177,7 @@ def test_yeni_dosya_sayilari_gunceller(istemci, tmp_path):
 
 
 @veri_gerekli
-def test_is_yuku_vaka_rakamlari(istemci):
+def test_is_yuku_rakamlari(istemci):
     _yukle(istemci, VERI)
     r = istemci.get("/api/is-yuku").json()
     assert r["elle"]["dakika"] == 15552 and r["elle"]["saat"] == 259.2 and r["elle"]["is_gunu"] == 43.2
@@ -190,9 +190,9 @@ def test_mulakat_blogu_ve_istem_degisince_taslak_yenilenir(motor, monkeypatch):
     from core import istem as istem_modulu
     from core.taslak import taslak_anahtari
     m, ds = motor
-    tur = {b: model_girdisi(m, ds[b])["gerekce_turu"] for b in ("BSV-001", "BSV-002", "BSV-051", "BSV-065", "BSV-008")}
+    tur = {b: model_girdisi(m, ds[b])["gerekce_turu"] for b in ("BSV-001", "BSV-002", "BSV-051", "BSV-004", "BSV-008")}
     assert tur == {"BSV-001": "sinav", "BSV-002": "mulakat", "BSV-051": "oznel_degerlendirme",
-                   "BSV-065": "ingilizce_gorusme", "BSV-008": "kontenjan"}
+                   "BSV-004": "ingilizce_gorusme", "BSV-008": "kontenjan"}
     video, grup = model_girdisi(m, ds["BSV-002"]), model_girdisi(m, ds["BSV-051"])
     once = taslak_anahtari(video), taslak_anahtari(grup)
     monkeypatch.setitem(istem_modulu.BLOKLAR, "mulakat", istem_modulu.BLOKLAR["mulakat"] + " Ek kural.")

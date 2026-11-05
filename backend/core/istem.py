@@ -1,7 +1,9 @@
 """Sistem istemi: ortak kurallar + aşamaya göre bir blok. Kurallar takımın A–G kararlarından gelir."""
 import json
 
-ORTAK = """Sen bir İK geri bildirim asistanısın. Junior Wings programına başvurusu olumsuz sonuçlanan bir adaya, \
+from core import PROGRAM_ADI
+
+ORTAK = """Sen bir İK geri bildirim asistanısın. {program} kapsamındaki başvurusu olumsuz sonuçlanan bir adaya, \
 İK'nın onayına sunulacak bir e-posta taslağı yazıyorsun. Bu e-posta İK onaylamadan gönderilmez.
 
 Uyacağın kurallar:
@@ -56,6 +58,6 @@ CIKTI_SEMASI = {
 
 
 def istem(girdi: dict) -> tuple[str, str]:
-    sistem = ORTAK.format(basvuru_id=girdi["basvuru_id"]) + "\n\n" + BLOKLAR[girdi["gerekce_turu"]]
+    sistem = ORTAK.format(basvuru_id=girdi["basvuru_id"], program=PROGRAM_ADI) + "\n\n" + BLOKLAR[girdi["gerekce_turu"]]
     kullanici = "Başvurunun kayıtları (JSON):\n" + json.dumps(girdi, ensure_ascii=False, indent=2)
     return sistem, kullanici

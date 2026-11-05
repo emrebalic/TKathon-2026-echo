@@ -1,6 +1,6 @@
 # İletişim kararları (A–G)
 
-Takımın kararları (`teslim/Cozum_Ozeti.docx`, 02. bölüm). İstem ve son kontrol bu kararlara göre yazıldı (`backend/core/istem.py`).
+Takımın kararları. İstem ve son kontrol bu kararlara göre yazıldı (`backend/core/istem.py`).
 
 | | Kararımız ve gerekçemiz | Elediğimiz seçenek ve nedeni | Örnek kayıt |
 |---|---|---|---|
@@ -19,7 +19,7 @@ neden tek cümlede, beceri alanı düzeyinde anlatılır; görev senaryosu, soru
 bir kısa genel cümle; kısa tutulur. İngilizce mülakatında puan ve baraj tek kısa cümlede kalır. Sınav (A), grup
 çalışması (B) ve kontenjan (C) e-postaları değişmedi. İstem değişince yalnız ilgili başvuruların taslakları yeniden üretilir.
 
-## Sunumda hazır olunacak soru
+## Açık soru: düzeltmeler ve gönderim zamanı
 
 **F ile düzeltmeler:** Veride 5 düzeltmenin hepsi karardan 19–20 saat sonra girilmiş (ör. BSV-033'ün yeniden puanlaması).
 Onaydan hemen sonra gönderimde, sistem gönderilmemiş taslak ve onayları geçersiz kılar; ama gönderilmiş bir e-postayı geri
